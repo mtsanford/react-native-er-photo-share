@@ -10,17 +10,11 @@ const ImageList = styled(FlatList).attrs({
   contentContainerStyle: {
     padding: 16,
   },
-})`
-  flex: 1;
-  flex-wrap: wrap;
-  width: 100%;
-  height: 100%;
-`;
+})``;
 
 const ImagePreviewWrapper = styled(View)`
   padding: 3px;
-  width: 50%;
-  height: 100px;
+  flex: 1;
   aspect-ratio: 1;
 `;
 
