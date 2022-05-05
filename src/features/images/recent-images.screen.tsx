@@ -23,21 +23,29 @@ const ImagePreview = styled(Image)`
   height: 100%;
 `;
 
-export const RecentImagesScreen = () => {
+const ImageItem = (props) => {
+  const { item, navigation } = props;
+  console.log("ImageItem", item);
+  return (
+    <ImagePreviewWrapper>
+      <TouchableOpacity onPress={() => navigation.navigate("Details", {})}>
+        <ImagePreview source={{ uri: item.preview }} />
+      </TouchableOpacity>
+    </ImagePreviewWrapper>
+  );
+};
+
+export const RecentImagesScreen = ({ navigation }) => {
   const { recentImages } = useContext(ImagesContext);
   return (
     <SafeArea>
       <ImageList
         data={recentImages}
         numColumns={2}
-        renderItem={({ item }) => {
-          return (
-            <ImagePreviewWrapper>
-              <ImagePreview source={{ uri: item.preview }} />
-            </ImagePreviewWrapper>
-          );
-        }}
-        keyExtractor={ (item) => item.id }
+        renderItem={({ item }) => (
+          <ImageItem item={item} navigation={navigation} />
+        )}
+        keyExtractor={(item) => item.id}
       ></ImageList>
     </SafeArea>
   );
