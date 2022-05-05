@@ -22,13 +22,23 @@ export default function App() {
       <NavigationContainer>
         <RootStack.Navigator>
           <RootStack.Group>
-            <RootStack.Screen name="Home" component={RecentImagesScreen} />
-            <RootStack.Screen name="Details" component={DetailsScreen} />
+            <RootStack.Screen
+              name="Home"
+              component={RecentImagesScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <RootStack.Screen
+              name="Details"
+              component={DetailsScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
           </RootStack.Group>
         </RootStack.Navigator>
       </NavigationContainer>
-
-      <RecentImagesScreen />
     </ImagesContextProvider>
   );
 }

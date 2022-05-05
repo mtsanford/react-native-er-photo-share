@@ -8,7 +8,7 @@ import { ImagesContext } from "../../services/images/images.context";
 
 const ImageList = styled(FlatList).attrs({
   contentContainerStyle: {
-    padding: 16,
+    padding: 4,
   },
 })``;
 
@@ -25,7 +25,6 @@ const ImagePreview = styled(Image)`
 
 const ImageItem = (props) => {
   const { item, navigation } = props;
-  console.log("ImageItem", item);
   return (
     <ImagePreviewWrapper>
       <TouchableOpacity onPress={() => navigation.navigate("Details", {})}>
