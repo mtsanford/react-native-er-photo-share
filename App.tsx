@@ -5,6 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import { ImagesContextProvider } from "./src/services/images/images.context";
 import { RecentImagesScreen } from "./src/features/images/recent-images.screen";
+import { ImageViewScreen } from './src/features/images/image-view.screen';
 
 const RootStack = createStackNavigator();
 
@@ -31,7 +32,7 @@ export default function App() {
             />
             <RootStack.Screen
               name="Details"
-              component={DetailsScreen}
+              component={ImageViewScreen}
               options={{
                 headerShown: false,
               }}

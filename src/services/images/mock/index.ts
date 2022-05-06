@@ -7,12 +7,7 @@ export const mockAllImages: Record<string, Image> = {
         title: "mock picture 1",
         full: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images%2Fpic_001_full.jpg?alt=media&token=8ef80f9b-3dbb-450d-b5a1-6b904489308c",
         preview: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images%2Fpic_001_square.jpg?alt=media&token=dd41d1b2-98b5-4d65-8a9c-868a0ba8b0ea",
-        essentialRect: {
-            left: 200,
-            top: 300,
-            width: 600,
-            height: 1200,
-        }
+        essentialRect: {left:416, top:219, width:553, height:738},
     },
     "pic2" : {
         id: "pic2",
@@ -98,12 +93,7 @@ export const mockAllImages: Record<string, Image> = {
         title: "mock picture 8",
         full: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images%2Fpic_008_full.jpg?alt=media&token=e1e22a41-b010-43c8-9a89-bb63e0f3ba30",
         preview: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images%2Fpic_008_square.jpg?alt=media&token=fbaa2d3d-a9cf-4ec0-9e2c-3f0949def1a1",
-        essentialRect: {
-            left: 200,
-            top: 300,
-            width: 600,
-            height: 1200,
-        }
+        essentialRect: {left:429, top:375, width:702, height:717}
     },
     "pic9" : {
         id: "pic9",

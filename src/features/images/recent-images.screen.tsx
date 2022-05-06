@@ -27,7 +27,7 @@ const ImageItem = (props) => {
   const { item, navigation } = props;
   return (
     <ImagePreviewWrapper>
-      <TouchableOpacity onPress={() => navigation.navigate("Details", {})}>
+      <TouchableOpacity onPress={() => navigation.navigate("Details", {item})}>
         <ImagePreview source={{ uri: item.preview }} />
       </TouchableOpacity>
     </ImagePreviewWrapper>
