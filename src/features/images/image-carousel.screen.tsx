@@ -17,8 +17,9 @@ const ImagePreview = styled(Image)`
   height: 100%;
 `;
 
-const ImageItem = ({ item, containerStyle }) => {
-  console.log(`ImageItem render...width ${containerStyle.width}`);
+const ImageItem = ({ item, screenDimensions }) => {
+  console.log(`ImageItem render...width ${screenDimensions.width}`);
+  const containerStyle = { width: screenDimensions.width, height: screenDimensions.height };
   return (
     <View style={containerStyle}>
       <EssentialRectImage
@@ -31,10 +32,17 @@ const ImageItem = ({ item, containerStyle }) => {
 
 const initialScreenDimensions = Dimensions.get("screen");
 
+const InitialImageItem = ({item}) => {
+  return <ImageItem item={item} screenDimensions={initialScreenDimensions} />
+}
+
+let renderImageItem = React.memo(InitialImageItem);
+console.log('renderImageItem', renderImageItem);
+console.log('InitialImageItem', InitialImageItem);
+
 export const ImageCarouselScreen = ({ navigation }) => {
   const [screenDimensions, setScreenDimensions] = useState(initialScreenDimensions);
   const [imageIndex, setImageIndex] = useState(0);
-  // const { width, height } = useWindowDimensions();
   const { recentImages } = useContext(ImagesContext);
   const ref = useRef<FlatList>();
 
@@ -50,15 +58,23 @@ export const ImageCarouselScreen = ({ navigation }) => {
   }, []);
 
   const screenChangedHandler = useCallback( ({screen}) => {
-    setScreenDimensions(screen);
+    setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
+    renderImageItem = React.memo( ({item}) => (<ImageItem item={item} screenDimensions={screen} />) );
     console.log('new screen', screen);
   }, []);
 
   useEffect( () => {
     console.log('screenChangedHandler changed')
+
+    const screenChangedHandler = ({screen}) => {
+      setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
+      renderImageItem = React.memo( ({item}) => <ImageItem item={item} screenDimensions={screen} /> );
+      console.log('new screen', screen);
+    }
+
     const sub = Dimensions.addEventListener("change", screenChangedHandler);
     return () => Dimensions.removeEventListener("change", screenChangedHandler);
-  }, [screenChangedHandler])
+  }, [])
 
   const getItemLayout = useCallback( (_, index) => ({
     length: screenDimensions.width,
@@ -66,10 +82,14 @@ export const ImageCarouselScreen = ({ navigation }) => {
     index,
   }), [screenDimensions]);
 
-  const renderItem = useCallback( ({item}) => {
+  const renderItemOld = useCallback( ({item}) => {
     const containerStyle = { width: screenDimensions.width, height: screenDimensions.height };
     return <ImageItem item={item} containerStyle={containerStyle} />
   }, [screenDimensions]);
+
+  // const renderItem = React.memo( ({item, width, height}) => {
+  //   return <ImageItem item={item} containerStyle={{width, height}} />
+  // })
 
   useEffect( () => {
     if (imageIndex) {
@@ -83,7 +103,7 @@ export const ImageCarouselScreen = ({ navigation }) => {
       <FlatList
         ref={ref}
         data={recentImages}
-        renderItem={renderItem}
+        renderItem={renderImageItem}
         onViewableItemsChanged={onViewableItemsChanged}
         snapToAlignment="start"
         decelerationRate={"fast"}
