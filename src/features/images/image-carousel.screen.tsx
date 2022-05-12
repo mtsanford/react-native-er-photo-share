@@ -6,16 +6,7 @@ import styled from "styled-components/native";
 import { EssentialRectImage } from "../../components/EssentialRectImage";
 import { ImagesContext } from "../../services/images/images.context";
 
-const ImageList = styled(FlatList).attrs({
-  contentContainerStyle: {
-    padding: 4,
-  },
-})``;
-
-const ImagePreview = styled(Image)`
-  width: 100%;
-  height: 100%;
-`;
+/****** MemoedImageItem ******/
 
 const ImageItem = ({ item, screenDimensions }) => {
   console.log(`ImageItem render...width ${screenDimensions.width}`);
@@ -30,23 +21,23 @@ const ImageItem = ({ item, screenDimensions }) => {
   );
 }
 
-const initialScreenDimensions = Dimensions.get("screen");
+const imageItemPropsAreEqual = (prev, next) => (
+  prev.item.full === next.item.full &&
+  prev.screenDimensions.width === next.screenDimensions.width &&
+  prev.screenDimensions.height === next.screenDimensions.height
+);
 
-const InitialImageItem = ({item}) => {
-  return <ImageItem item={item} screenDimensions={initialScreenDimensions} />
-}
+const MemoedImageItem = React.memo(ImageItem, imageItemPropsAreEqual)
 
-let renderImageItem = React.memo(InitialImageItem);
-console.log('renderImageItem', renderImageItem);
-console.log('InitialImageItem', InitialImageItem);
+/************/
 
 export const ImageCarouselScreen = ({ navigation }) => {
-  const [screenDimensions, setScreenDimensions] = useState(initialScreenDimensions);
+  const [screenDimensions, setScreenDimensions] = useState(Dimensions.get("screen"));
   const [imageIndex, setImageIndex] = useState(0);
   const { recentImages } = useContext(ImagesContext);
   const ref = useRef<FlatList>();
 
-  const { width, height } = screenDimensions;
+  const { width: screenWidth } = screenDimensions;
 
   console.log('ImageCarouselScreen render');
 
@@ -57,18 +48,12 @@ export const ImageCarouselScreen = ({ navigation }) => {
     }
   }, []);
 
-  const screenChangedHandler = useCallback( ({screen}) => {
-    setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
-    renderImageItem = React.memo( ({item}) => (<ImageItem item={item} screenDimensions={screen} />) );
-    console.log('new screen', screen);
-  }, []);
-
   useEffect( () => {
     console.log('screenChangedHandler changed')
 
     const screenChangedHandler = ({screen}) => {
+      // we're getting a new object, so to prevent excessive rerenders, to deep check for equality
       setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
-      renderImageItem = React.memo( ({item}) => <ImageItem item={item} screenDimensions={screen} /> );
       console.log('new screen', screen);
     }
 
@@ -82,15 +67,6 @@ export const ImageCarouselScreen = ({ navigation }) => {
     index,
   }), [screenDimensions]);
 
-  const renderItemOld = useCallback( ({item}) => {
-    const containerStyle = { width: screenDimensions.width, height: screenDimensions.height };
-    return <ImageItem item={item} containerStyle={containerStyle} />
-  }, [screenDimensions]);
-
-  // const renderItem = React.memo( ({item, width, height}) => {
-  //   return <ImageItem item={item} containerStyle={{width, height}} />
-  // })
-
   useEffect( () => {
     if (imageIndex) {
       console.log(`scrolling to ${imageIndex}`);
@@ -103,11 +79,11 @@ export const ImageCarouselScreen = ({ navigation }) => {
       <FlatList
         ref={ref}
         data={recentImages}
-        renderItem={renderImageItem}
+        renderItem={ ({item}) => <MemoedImageItem item={item} screenDimensions={screenDimensions} /> }
         onViewableItemsChanged={onViewableItemsChanged}
         snapToAlignment="start"
         decelerationRate={"fast"}
-        snapToInterval={width}
+        snapToInterval={screenWidth}
         getItemLayout={getItemLayout}
         horizontal
         keyExtractor={(item) => item.id}
@@ -116,25 +92,9 @@ export const ImageCarouselScreen = ({ navigation }) => {
   );
 };
 
-// renderItem={({ item }) => (
-//   <View style={containerStyle}>
-//     <EssentialRectImage
-//       src={item.full}
-//       essentialRect={item.essentialRect}
-//     />
-//   </View>
-// )}
-
-
 const styles = StyleSheet.create({
   carousel: {
     flex: 1,
-  },
-  container: {
-    // height: Dimensions.get("window").height,
-    // width: Dimensions.get("window").width,
-    // width: '100%',
-    // height: '100%',
   },
   imageItem: {
     flex: 1,
