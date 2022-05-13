@@ -36,26 +36,24 @@ export const ImageCarouselScreen = ({ navigation }) => {
   const { recentImages } = useContext(ImagesContext);
   const ref = useRef<FlatList>();
 
-  const { width: screenWidth } = screenDimensions;
+  const { height: itemSize } = screenDimensions;
 
   const onViewableItemsChanged = useCallback( ({viewableItems}) => {
     if (viewableItems.length === 1) {
       setImageIndex(viewableItems[0].index);
-      console.log('new index', viewableItems[0].index);
     }
   }, []);
 
   const getItemLayout = useCallback( (_, index) => ({
-    length: screenDimensions.width,
-    offset: screenDimensions.width * index,
+    length: itemSize,
+    offset: itemSize * index,
     index,
-  }), [screenDimensions]);
+  }), [itemSize]);
 
   useEffect( () => {
     const screenChangedHandler = ({screen}) => {
       // we're getting a new object, so to prevent excessive rerenders, to deep check for equality
       setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
-      console.log('new screen', screen);
     }
 
     const sub = Dimensions.addEventListener("change", screenChangedHandler);
@@ -77,9 +75,8 @@ export const ImageCarouselScreen = ({ navigation }) => {
         onViewableItemsChanged={onViewableItemsChanged}
         snapToAlignment="start"
         decelerationRate={"fast"}
-        snapToInterval={screenWidth}
+        snapToInterval={itemSize}
         getItemLayout={getItemLayout}
-        horizontal
         keyExtractor={(item) => item.id}
       />
     </View>
