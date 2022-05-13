@@ -1,7 +1,6 @@
-import React, { useContext, useState, useEffect, useCallback, useRef, memo } from "react";
-import { useWindowDimensions, Dimensions } from "react-native";
-import { FlatList, Image, View, StyleSheet } from "react-native";
-import styled from "styled-components/native";
+import React, { useContext, useState, useEffect, useCallback, useRef } from "react";
+import { Dimensions } from "react-native";
+import { FlatList, View, StyleSheet } from "react-native";
 
 import { EssentialRectImage } from "../../components/EssentialRectImage";
 import { ImagesContext } from "../../services/images/images.context";
@@ -39,8 +38,6 @@ export const ImageCarouselScreen = ({ navigation }) => {
 
   const { width: screenWidth } = screenDimensions;
 
-  console.log('ImageCarouselScreen render');
-
   const onViewableItemsChanged = useCallback( ({viewableItems}) => {
     if (viewableItems.length === 1) {
       setImageIndex(viewableItems[0].index);
@@ -48,9 +45,13 @@ export const ImageCarouselScreen = ({ navigation }) => {
     }
   }, []);
 
-  useEffect( () => {
-    console.log('screenChangedHandler changed')
+  const getItemLayout = useCallback( (_, index) => ({
+    length: screenDimensions.width,
+    offset: screenDimensions.width * index,
+    index,
+  }), [screenDimensions]);
 
+  useEffect( () => {
     const screenChangedHandler = ({screen}) => {
       // we're getting a new object, so to prevent excessive rerenders, to deep check for equality
       setScreenDimensions( prevScreen => (prevScreen.width === screen.width && prevScreen.height === screen.height) ? prevScreen : screen );
@@ -61,15 +62,8 @@ export const ImageCarouselScreen = ({ navigation }) => {
     return () => Dimensions.removeEventListener("change", screenChangedHandler);
   }, [])
 
-  const getItemLayout = useCallback( (_, index) => ({
-    length: screenDimensions.width,
-    offset: screenDimensions.width * index,
-    index,
-  }), [screenDimensions]);
-
   useEffect( () => {
     if (imageIndex) {
-      console.log(`scrolling to ${imageIndex}`);
       ref.current?.scrollToIndex({ animated: false, index: imageIndex });
     }
   }, [screenDimensions])
