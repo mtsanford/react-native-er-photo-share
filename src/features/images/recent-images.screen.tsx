@@ -97,7 +97,7 @@ const ImageItem = (props) => {
   return (
     <View style={style}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Details", { item })}
+        onPress={() => navigation.navigate("Carousel")}
       >
         <ImagePreview source={{ uri: item.preview }} />
       </TouchableOpacity>

@@ -5,8 +5,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import { ImagesContextProvider } from "./src/services/images/images.context";
 import { RecentImagesScreen } from "./src/features/images/recent-images.screen";
-import { ImageViewScreen } from './src/features/images/image-view.screen';
+import { ImageViewScreen } from "./src/features/images/image-view.screen";
 import { ImageCarouselScreen } from "./src/features/images/image-carousel.screen";
+import 'react-native-gesture-handler';
 
 const RootStack = createStackNavigator();
 
@@ -26,6 +27,13 @@ export default function App() {
           <RootStack.Group>
             <RootStack.Screen
               name="Home"
+              component={RecentImagesScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <RootStack.Screen
+              name="Carousel"
               component={ImageCarouselScreen}
               options={{
                 headerShown: false,
@@ -37,22 +45,6 @@ export default function App() {
     </ImagesContextProvider>
   );
 }
-
-{/* <RootStack.Screen
-name="Home"
-component={RecentImagesScreen}
-options={{
-  headerShown: false,
-}}
-/>
-<RootStack.Screen
-name="Details"
-component={ImageViewScreen}
-options={{
-  headerShown: false,
-}}
-/> */}
-
 
 const styles = StyleSheet.create({
   container: {
