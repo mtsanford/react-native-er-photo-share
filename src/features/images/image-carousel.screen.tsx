@@ -78,6 +78,9 @@ export const ImageCarouselScreen = ({ navigation }) => {
         snapToInterval={itemSize}
         getItemLayout={getItemLayout}
         keyExtractor={(item) => item.id}
+        initialNumToRender={1}
+        maxToRenderPerBatch={2}
+        windowSize={5}
       />
     </View>
   );
