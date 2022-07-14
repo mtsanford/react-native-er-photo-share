@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Image, ImageSourcePropType, ViewStyle, ImageStyle } from "react-native";
 import { Rect } from "../infrastructure/types/geometry.types";
 import { fitRect } from "../infrastructure/fit-essential-rect";
@@ -13,13 +13,18 @@ export const EssentialRectImage = (props: EssentialRectImageProps) => {
   const { src, essentialRect } = props;
   const [clientRect, setClientRect] = useState<Rect | null>(null);
   const [imageRect, setImageRect] = useState<Rect | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     Image.getSize(src, (width, height) => {
-      setImageRect({left: 0, top: 0, width, height});
+      if (mountedRef.current) {
+        setImageRect({left: 0, top: 0, width, height});
+      }
     }, (error) => {
       console.log(error);
     })
+
+    return () => { mountedRef.current = false };
   }, [src])
 
   let imageStyles: ImageStyle = {};

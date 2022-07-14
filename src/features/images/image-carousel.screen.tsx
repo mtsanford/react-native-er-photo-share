@@ -14,7 +14,7 @@ import { ImagesContext } from "../../services/images/images.context";
 /****** MemoedImageItem ******/
 
 const ImageItem = ({ item, screenDimensions }) => {
-  console.log(`ImageItem render...width ${screenDimensions.width}`);
+  // console.log(`ImageItem render...width ${screenDimensions.width}`);
   const containerStyle = {
     width: screenDimensions.width,
     height: screenDimensions.height,
@@ -36,11 +36,13 @@ const MemoedImageItem = React.memo(ImageItem, imageItemPropsAreEqual);
 /************/
 
 const ImageCarouselList = ({ imageList, screenDimensions, initialIndex, onIndexChanged }) => {
-
   const { height: itemSize } = screenDimensions;
 
+  console.log(`ImageCarouselList initialIndex=${initialIndex} itemSize=${itemSize}`);
+  
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length === 1) {
+      console.log("onViewableItemsChanged changed ", viewableItems[0].index);
       onIndexChanged(viewableItems[0].index);
     }
   }, [onIndexChanged]);
@@ -78,15 +80,20 @@ type Orientation = 'portrait' | 'landscape';
 
 export const ImageCarouselScreen = ({ navigation }) => {
   const [screenDimensions, setScreenDimensions] = useState(Dimensions.get("screen"));
-  const [imageIndex, setImageIndex] = useState(0);
+  // const [imageIndex, setImageIndex] = useState(0);
   const { recentImages } = useContext(ImagesContext);
+  const indexRef = useRef<Number>(0);
   // const ref = useRef<FlatList>();
 
   const orientation = screenDimensions.width > screenDimensions.height ? 'landscape' : 'portrait';
   const { height: itemSize } = screenDimensions;
 
+  console.log("ImageCarouselScreen")
+
   const onIndexChanged = useCallback((index) => {
-    setImageIndex(index);
+    console.log('new image index = ', index)
+    indexRef.current = index;
+    //setImageIndex(index);
   }, []);
 
   useEffect(() => {
@@ -103,6 +110,12 @@ export const ImageCarouselScreen = ({ navigation }) => {
     return () => Dimensions.removeEventListener("change", screenChangedHandler);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      console.log('ImageCarouselScreen unloaded')
+    }
+  }, [])
+
   // useEffect(() => {
   //   if (imageIndex) {
   //     ref.current?.scrollToIndex({ animated: false, index: imageIndex });
@@ -111,8 +124,7 @@ export const ImageCarouselScreen = ({ navigation }) => {
 
   return (
     <View style={styles.carousel}>
-      {(orientation === 'landscape') && <ImageCarouselList imageList={recentImages} screenDimensions={screenDimensions} initialIndex={imageIndex} onIndexChanged={onIndexChanged} />}
-      {(orientation === 'portrait') && <ImageCarouselList imageList={recentImages} screenDimensions={screenDimensions} initialIndex={imageIndex} onIndexChanged={onIndexChanged} />}
+      <ImageCarouselList imageList={recentImages} screenDimensions={screenDimensions} initialIndex={indexRef.current} onIndexChanged={onIndexChanged} />
     </View>
   );
 };
