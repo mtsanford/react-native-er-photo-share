@@ -57,6 +57,12 @@ const ImageCarouselList = ({
     [onIndexChanged]
   );
 
+  useEffect(() => {
+    return () => {
+      console.log(`ImageCarouselList itemsize=${itemSize} unloaded`);
+    };
+  }, []);
+
   const getItemLayout = useCallback(
     (_, index) => ({
       length: itemSize,
@@ -65,6 +71,10 @@ const ImageCarouselList = ({
     }),
     [itemSize]
   );
+
+  const onLayout = useCallback(() => {
+    console.log("onLayout");
+  }, []);
 
   return (
     <FlatList
@@ -82,6 +92,39 @@ const ImageCarouselList = ({
       initialNumToRender={1}
       maxToRenderPerBatch={2}
       windowSize={5}
+      onLayout={onLayout}
+    />
+  );
+};
+
+const PortraitCarousel = ({
+  imageList,
+  screenDimensions,
+  initialIndex,
+  onIndexChanged,
+}) => {
+  return (
+    <ImageCarouselList
+      imageList={imageList}
+      screenDimensions={screenDimensions}
+      initialIndex={initialIndex}
+      onIndexChanged={onIndexChanged}
+    />
+  );
+};
+
+const LandscapeCarousel = ({
+  imageList,
+  screenDimensions,
+  initialIndex,
+  onIndexChanged,
+}) => {
+  return (
+    <ImageCarouselList
+      imageList={imageList}
+      screenDimensions={screenDimensions}
+      initialIndex={initialIndex}
+      onIndexChanged={onIndexChanged}
     />
   );
 };
@@ -95,20 +138,20 @@ export const ImageCarouselScreen = ({ navigation }) => {
   // const [imageIndex, setImageIndex] = useState(0);
   const { recentImages } = useContext(ImagesContext);
   const indexRef = useRef<number>(0);
-  const listRef = useRef<FlatList>();
+  const flatListRef = useRef<FlatList>();
 
-  // const orientation =
-  //   screenDimensions.width > screenDimensions.height ? "landscape" : "portrait";
+  const orientation =
+    screenDimensions.width > screenDimensions.height ? "landscape" : "portrait";
 
   const { height: itemSize } = screenDimensions;
 
   console.log(`ImageCarouselScreen itemSize=${itemSize}`);
 
-  // const onIndexChanged = useCallback((index) => {
-  //   console.log("new image index = ", index);
-  //   indexRef.current = index;
-  //   //setImageIndex(index);
-  // }, []);
+  const onIndexChanged = useCallback((index) => {
+    console.log("new image index = ", index);
+    indexRef.current = index;
+    //setImageIndex(index);
+  }, []);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }) => {
@@ -124,6 +167,7 @@ export const ImageCarouselScreen = ({ navigation }) => {
   useEffect(() => {
     const screenChangedHandler = ({ screen }) => {
       // we're getting a new object, so to prevent excessive rerenders, to deep check for equality
+      console.log("screenChangedHandler", screen);
       setScreenDimensions((prevScreen) =>
         prevScreen.width === screen.width && prevScreen.height === screen.height
           ? prevScreen
@@ -135,22 +179,28 @@ export const ImageCarouselScreen = ({ navigation }) => {
     return () => Dimensions.removeEventListener("change", screenChangedHandler);
   }, []);
 
+
   useEffect(() => {
     return () => {
       console.log("ImageCarouselScreen unloaded");
     };
   }, []);
 
-  useEffect(() => {
-    console.log('scrollToIndex ', indexRef.current);
-    listRef.current?.scrollToIndex({ animated: false, index: indexRef.current });
-  }, [screenDimensions]);
+  // useEffect(() => {
+  //   console.log('scrollToIndex ', indexRef.current);
+  //   listRef.current?.scrollToIndex({ animated: false, index: indexRef.current });
+  // }, [screenDimensions]);
 
   const getItemLayout = (_, index) => ({
     length: itemSize,
     offset: itemSize * index,
     index,
   });
+
+  const onContentSizeChange = useCallback(() => {
+      console.log('onContentSizeChange scrollToIndex ', indexRef.current);
+      flatListRef.current?.scrollToIndex({ animated: false, index: indexRef.current });
+  }, []);
 
   return (
     <View style={styles.carousel}>
@@ -165,13 +215,38 @@ export const ImageCarouselScreen = ({ navigation }) => {
         snapToInterval={itemSize}
         getItemLayout={getItemLayout}
         keyExtractor={(item) => item.id}
-        // initialScrollIndex={indexRef.current}
+        // initialScrollIndex={initialIndex}
         initialNumToRender={1}
         maxToRenderPerBatch={2}
         windowSize={5}
-        ref={listRef}
+        onLayout={onContentSizeChange}
+        ref={flatListRef}
       />
-      {/* <ImageCarouselList imageList={recentImages} screenDimensions={screenDimensions} initialIndex={indexRef.current} onIndexChanged={onIndexChanged} /> */}
+
+      {/* { orientation === "landscape" && <View style={styles.red} />}
+      { orientation === "portrait" && <View style={styles.green} />} */}
+      {/* <LandscapeCarousel
+          imageList={recentImages}
+          screenDimensions={screenDimensions}
+          initialIndex={indexRef.current}
+          onIndexChanged={onIndexChanged}
+        /> */}
+      {/* {orientation === "landscape" && (
+        <LandscapeCarousel
+          imageList={recentImages}
+          screenDimensions={screenDimensions}
+          initialIndex={indexRef.current}
+          onIndexChanged={onIndexChanged}
+        />
+      )}
+      {orientation === "portrait" && (
+        <PortraitCarousel
+          imageList={recentImages}
+          screenDimensions={screenDimensions}
+          initialIndex={indexRef.current}
+          onIndexChanged={onIndexChanged}
+        />
+      )} */}
     </View>
   );
 };
@@ -182,5 +257,13 @@ const styles = StyleSheet.create({
   },
   imageItem: {
     flex: 1,
+  },
+  red: {
+    flex: 1,
+    backgroundColor: "red",
+  },
+  green: {
+    flex: 1,
+    backgroundColor: "green",
   },
 });

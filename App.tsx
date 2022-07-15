@@ -7,6 +7,7 @@ import { ImagesContextProvider } from "./src/services/images/images.context";
 import { RecentImagesScreen } from "./src/features/images/recent-images.screen";
 import { ImageViewScreen } from "./src/features/images/image-view.screen";
 import { ImageCarouselScreen } from "./src/features/images/image-carousel.screen";
+import { ImageCarouselSingleFlatListScreen } from "./src/features/images/image-carousel-single-flatlist.screen";
 import 'react-native-gesture-handler';
 
 const RootStack = createStackNavigator();
@@ -34,7 +35,7 @@ export default function App() {
             />
             <RootStack.Screen
               name="Carousel"
-              component={ImageCarouselScreen}
+              component={ImageCarouselSingleFlatListScreen}
               options={{
                 headerShown: false,
               }}

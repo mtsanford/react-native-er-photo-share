@@ -1,4 +1,4 @@
-import { Rect } from './geometry.types';
+import { Rect, Size } from './geometry.types';
 
 export interface Image {
     id: string;
@@ -7,5 +7,6 @@ export interface Image {
     preview: string;
     full: string;
     essentialRect: Rect;
+    size?: Size;
 }
 

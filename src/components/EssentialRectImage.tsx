@@ -1,31 +1,41 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Image, ImageSourcePropType, ViewStyle, ImageStyle } from "react-native";
-import { Rect } from "../infrastructure/types/geometry.types";
+import { Rect, Size } from "../infrastructure/types/geometry.types";
 import { fitRect } from "../infrastructure/fit-essential-rect";
 
 
 interface EssentialRectImageProps {
   src: string;
   essentialRect: Rect;
+  imageSize: Size;
 }
 
 export const EssentialRectImage = (props: EssentialRectImageProps) => {
-  const { src, essentialRect } = props;
+  const { src, essentialRect, imageSize } = props;
   const [clientRect, setClientRect] = useState<Rect | null>(null);
-  const [imageRect, setImageRect] = useState<Rect | null>(null);
-  const mountedRef = useRef(true);
+  // const mountedRef = useRef(true);
 
-  useEffect(() => {
-    Image.getSize(src, (width, height) => {
-      if (mountedRef.current) {
-        setImageRect({left: 0, top: 0, width, height});
-      }
-    }, (error) => {
-      console.log(error);
-    })
+  const imageRect: Rect = {
+    width: imageSize.width,
+    height: imageSize.height,
+    left: 0,
+    top: 0,
+  }
 
-    return () => { mountedRef.current = false };
-  }, [src])
+  // useEffect(() => {
+  //   const start = Date.now();
+  //   Image.getSize(src, (width, height) => {
+  //     if (mountedRef.current) {
+  //       const duration = Date.now() - start;
+  //       console.log(`Image.getSize took ${duration}ms for ${src}`);
+  //       setImageRect({left: 0, top: 0, width, height});
+  //     }
+  //   }, (error) => {
+  //     console.log(error);
+  //   })
+
+  //   return () => { mountedRef.current = false };
+  // }, [src])
 
   let imageStyles: ImageStyle = {};
 
