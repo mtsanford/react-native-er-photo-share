@@ -22,9 +22,10 @@ const ImageList2Col = ({ images, navigation }) => (
   <ImageList
     data={images}
     numColumns={2}
-    renderItem={({ item }) => (
+    renderItem={({ item, index }) => (
       <ImageItem
         item={item}
+        index={index}
         navigation={navigation}
         style={styles.imagePreviewWrapper_2_column}
       />
@@ -37,9 +38,10 @@ const ImageList3Col = ({ images, navigation }) => (
   <ImageList
     data={images}
     numColumns={3}
-    renderItem={({ item }) => (
+    renderItem={({ item, index }) => (
       <ImageItem
         item={item}
+        index={index}
         navigation={navigation}
         style={styles.imagePreviewWrapper_3_column}
       />
@@ -52,9 +54,10 @@ const ImageList4Col = ({ images, navigation }) => (
   <ImageList
     data={images}
     numColumns={4}
-    renderItem={({ item }) => (
+    renderItem={({ item, index }) => (
       <ImageItem
         item={item}
+        index={index}
         navigation={navigation}
         style={styles.imagePreviewWrapper_4_column}
       />
@@ -67,9 +70,10 @@ const ImageList5Col = ({ images, navigation }) => (
   <ImageList
     data={images}
     numColumns={5}
-    renderItem={({ item }) => (
+    renderItem={({ item, index }) => (
       <ImageItem
         item={item}
+        index={index}
         navigation={navigation}
         style={styles.imagePreviewWrapper_5_column}
       />
@@ -93,11 +97,11 @@ const calcColumns = (width: number, height: number) => {
 };
 
 const ImageItem = (props) => {
-  const { item, navigation, style } = props;
+  const { item, navigation, style, index } = props;
   return (
     <View style={style}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Carousel")}
+        onPress={() => navigation.navigate("Carousel", { initialIndex: index} )} 
       >
         <ImagePreview source={{ uri: item.preview }} />
       </TouchableOpacity>

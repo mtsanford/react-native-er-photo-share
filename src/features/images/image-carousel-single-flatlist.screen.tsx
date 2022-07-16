@@ -52,10 +52,10 @@ export const ImageFlatList = ({
 }) => {
   const scrollingRef = useRef<boolean>(false);
   const flatListRef = useRef<FlatList>();
-  const indexRef = useRef<number>(0);
+  const indexRef = useRef<number>(initialIndex);
   const itemSize = screenDimensions.height;
 
-  console.log(`ImageFlatList ${itemSize}`)
+  console.log(`ImageFlatList ${itemSize} initialIndex ${initialIndex}`)
 
   useEffect(() => {
     return () => {
@@ -144,7 +144,7 @@ export const ImageFlatList = ({
   );
 };
 
-export const ImageCarouselSingleFlatListScreen = ({ navigation }) => {
+export const ImageCarouselSingleFlatListScreen = ({ route, navigation }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
@@ -152,8 +152,9 @@ export const ImageCarouselSingleFlatListScreen = ({ navigation }) => {
   const indexRef = useRef<number>(0);
 
   const { height: itemSize } = screenDimensions;
+  const initialIndex = route.params?.initialIndex;
 
-  console.log(`ImageCarouselScreen itemSize=${itemSize}`);
+  console.log(`ImageCarouselScreen itemSize=${itemSize} ${initialIndex}`);
 
   const onIndexChanged = useCallback((index) => {
     indexRef.current = index;
@@ -184,7 +185,7 @@ export const ImageCarouselSingleFlatListScreen = ({ navigation }) => {
     <View style={styles.carousel}>
       <ImageFlatList
         data={recentImages}
-        initialIndex={0}
+        initialIndex={initialIndex}
         onIndexChanged={onIndexChanged}
         screenDimensions={screenDimensions}
       />
