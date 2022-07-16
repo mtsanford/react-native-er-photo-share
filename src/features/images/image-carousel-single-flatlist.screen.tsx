@@ -21,7 +21,11 @@ const ImageItem = ({ item, screenDimensions }) => {
   };
   return (
     <View style={containerStyle}>
-      <EssentialRectImage src={item.full} essentialRect={item.essentialRect} imageSize={item.size} />
+      <EssentialRectImage
+        src={item.full}
+        essentialRect={item.essentialRect}
+        imageSize={item.size}
+      />
     </View>
   );
 };
@@ -36,41 +40,129 @@ const MemoedImageItem = React.memo(ImageItem, imageItemPropsAreEqual);
 /************/
 
 const viewabilityConfig: ViewabilityConfig = {
-  minimumViewTime: 50,
-  itemVisiblePercentThreshold: 80,
-}
+  minimumViewTime: 0,
+  itemVisiblePercentThreshold: 90,
+};
+
+export const ImageFlatList = ({
+  data,
+  initialIndex,
+  onIndexChanged,
+  screenDimensions,
+}) => {
+  const scrollingRef = useRef<boolean>(false);
+  const flatListRef = useRef<FlatList>();
+  const indexRef = useRef<number>(0);
+  const itemSize = screenDimensions.height;
+
+  console.log(`ImageFlatList ${itemSize}`)
+
+  useEffect(() => {
+    return () => {
+      console.log(`ImageFlatList ${screenDimensions.height} unloaded`);
+    };
+  }, []);
+
+  // Keep track of which image item is "current", so that we can scroll to it
+  // on orientation change.
+  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+    if (viewableItems.length !== 1) {
+      console.log('onViewableItemsChanged rejected because not exactly 1 viewable item');
+      return;
+    }
+
+    // reject the item change if it's in repsonse to an orientation change
+    if (!scrollingRef.current) {
+      console.log('onViewableItemsChanged rejected because not during scroll');
+      return;
+    }
+    const index = viewableItems[0].index;
+    console.log("onViewableItemsChanged new image index = ", index);
+    onIndexChanged(index);
+    indexRef.current = index;
+    
+  }, []);
+
+  const getItemLayout = (_, index) => ({
+    length: itemSize,
+    offset: itemSize * index,
+    index,
+  });
+
+  const onScrollBeginDrag = () => {
+    console.log('onScrollBeginDrag');
+    scrollingRef.current = true;
+  }
+
+  const onScrollEndDrag = () => {
+    console.log('onScrollEndDrag');
+    scrollingRef.current = false;
+  }
+
+  const onMomentumScrollBegin = () => {
+    console.log('onMomentumScrollBegin');
+    scrollingRef.current = true;
+  }
+
+  const onMomentumScrollEnd = () => {
+    console.log('onMomentumScrollEnd');
+    scrollingRef.current = false;
+  }
+
+  const scrollToIndex = useCallback(() => {
+    console.log("scrollToIndex scrollToIndex ", indexRef.current);
+    flatListRef.current?.scrollToIndex({
+      animated: false,
+      index: indexRef.current,
+    });
+  }, []);
+
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => (
+        <MemoedImageItem item={item} screenDimensions={screenDimensions} />
+      )}
+      viewabilityConfig={viewabilityConfig}
+      onViewableItemsChanged={onViewableItemsChanged}
+      snapToAlignment="start"
+      decelerationRate={"fast"}
+      snapToInterval={itemSize}
+      getItemLayout={getItemLayout}
+      keyExtractor={(item) => item.id}
+      initialScrollIndex={initialIndex}
+      initialNumToRender={1}
+      maxToRenderPerBatch={2}
+      windowSize={5}
+      onScrollBeginDrag={onScrollBeginDrag}
+      onScrollEndDrag={onScrollEndDrag}
+      onMomentumScrollBegin={onMomentumScrollBegin}
+      onMomentumScrollEnd={onMomentumScrollEnd}
+      onLayout={scrollToIndex}
+      ref={flatListRef}
+    />
+  );
+};
 
 export const ImageCarouselSingleFlatListScreen = ({ navigation }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
-  // const [imageIndex, setImageIndex] = useState(0);
   const { recentImages } = useContext(ImagesContext);
   const indexRef = useRef<number>(0);
-  const flatListRef = useRef<FlatList>();
 
   const { height: itemSize } = screenDimensions;
 
   console.log(`ImageCarouselScreen itemSize=${itemSize}`);
 
   const onIndexChanged = useCallback((index) => {
-    console.log("new image index = ", index);
     indexRef.current = index;
-    //setImageIndex(index);
-  }, []);
-
-  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
-    if (viewableItems.length === 1) {
-      console.log("onViewableItemsChanged changed ", viewableItems[0].index);
-      // onIndexChanged(viewableItems[0].index);
-      indexRef.current = viewableItems[0].index;
-    }
   }, []);
 
   useEffect(() => {
     const screenChangedHandler = ({ screen }) => {
-      // we're getting a new object, so to prevent excessive rerenders, to deep check for equality
-      console.log("screenChangedHandler", screen);
+      // we're getting a new object, and we may get multiple events for one orientation change
+      // so to prevent excessive rerenders, to deep check for equality
       setScreenDimensions((prevScreen) =>
         prevScreen.width === screen.width && prevScreen.height === screen.height
           ? prevScreen
@@ -88,50 +180,14 @@ export const ImageCarouselSingleFlatListScreen = ({ navigation }) => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log('scrollToIndex ', indexRef.current);
-  //   listRef.current?.scrollToIndex({ animated: false, index: indexRef.current });
-  // }, [screenDimensions]);
-
-  const getItemLayout = (_, index) => ({
-    length: itemSize,
-    offset: itemSize * index,
-    index,
-  });
-
-  const scrollToIndex = useCallback(() => {
-    console.log("scrollToIndex scrollToIndex ", indexRef.current);
-    flatListRef.current?.scrollToIndex({
-      animated: false,
-      index: indexRef.current,
-    });
-  }, []);
-
   return (
     <View style={styles.carousel}>
-      <FlatList
+      <ImageFlatList
         data={recentImages}
-        renderItem={({ item }) => (
-          <MemoedImageItem item={item} screenDimensions={screenDimensions} />
-        )}
-        viewabilityConfig={viewabilityConfig}
-        onViewableItemsChanged={onViewableItemsChanged}
-        snapToAlignment="start"
-        decelerationRate={"fast"}
-        snapToInterval={itemSize}
-        getItemLayout={getItemLayout}
-        keyExtractor={(item) => item.id}
-        // initialScrollIndex={initialIndex}
-        initialNumToRender={1}
-        maxToRenderPerBatch={2}
-        windowSize={5}
-        // onLayout={scrollToIndex}
-        onContentSizeChange={scrollToIndex}
-        ref={flatListRef}
+        initialIndex={0}
+        onIndexChanged={onIndexChanged}
+        screenDimensions={screenDimensions}
       />
-
-      {/* { orientation === "landscape" && <View style={styles.red} />}
-        { orientation === "portrait" && <View style={styles.green} />} */}
     </View>
   );
 };
@@ -142,13 +198,5 @@ const styles = StyleSheet.create({
   },
   imageItem: {
     flex: 1,
-  },
-  red: {
-    flex: 1,
-    backgroundColor: "red",
-  },
-  green: {
-    flex: 1,
-    backgroundColor: "green",
   },
 });
