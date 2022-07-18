@@ -6,22 +6,35 @@ import React, {
   useRef,
 } from "react";
 import { Dimensions, ViewabilityConfig } from "react-native";
-import { FlatList, View, StyleSheet } from "react-native";
+import { FlatList, View, StyleSheet, Text } from "react-native";
 
 import { EssentialRectImage } from "../../components/EssentialRectImage";
 import { ImagesContext } from "../../services/images/images.context";
 
 /****** MemoedImageItem ******/
 
-const ImageItem = ({ item, screenDimensions }) => {
-  console.log(`ImageItem render...${screenDimensions.height} ${item.full}`);
+const ImageItem = ({ item, itemSize }) => {
+  // console.log(`ImageItem render...${screenDimensions.height} ${item.full}`);
   const containerStyle = {
-    width: screenDimensions.width,
-    height: screenDimensions.height,
+    width: '100%',
+    height: itemSize,
   };
+
+  useEffect(() => {
+    () => {
+      console.log(
+        `ImageItem UNMOUNT...${item.full}`
+      );
+    };
+  }, []);
+
+  const onLayout = ({nativeEvent}) => {
+    // console.log(`onLayout`, nativeEvent);
+  }
+
   return (
-    <View style={containerStyle}>
-      <EssentialRectImage
+    <View style={containerStyle} onLayout={onLayout}>
+      <MemoedEssentialRectImage
         src={item.full}
         essentialRect={item.essentialRect}
         imageSize={item.size}
@@ -30,10 +43,19 @@ const ImageItem = ({ item, screenDimensions }) => {
   );
 };
 
-const imageItemPropsAreEqual = (prev, next) =>
-  prev.item.full === next.item.full &&
-  prev.screenDimensions.width === next.screenDimensions.width &&
-  prev.screenDimensions.height === next.screenDimensions.height;
+const essentialRectImagePropsAreEqual = (prev, next) => prev.src === next.src;
+
+const MemoedEssentialRectImage = React.memo(EssentialRectImage, essentialRectImagePropsAreEqual);
+
+// const imageItemPropsAreEqual = (prev, next) => {
+//   const result =
+//     prev.item.full === next.item.full &&
+//     prev.screenDimensions.width === next.screenDimensions.width &&
+//     prev.screenDimensions.height === next.screenDimensions.height;
+//   console.log(`imageItemPropsAreEqual ${result} ${next.item.full}`);
+//   return result;
+// };
+const imageItemPropsAreEqual = (prev, next) => (prev.item.full === next.item.full && prev.itemSize === next.itemSize);
 
 const MemoedImageItem = React.memo(ImageItem, imageItemPropsAreEqual);
 
@@ -55,7 +77,7 @@ export const ImageFlatList = ({
   const indexRef = useRef<number>(initialIndex);
   const itemSize = screenDimensions.height;
 
-  console.log(`ImageFlatList ${itemSize} initialIndex ${initialIndex}`)
+  console.log(`ImageFlatList ${itemSize} initialIndex ${initialIndex}`);
 
   useEffect(() => {
     return () => {
@@ -67,47 +89,52 @@ export const ImageFlatList = ({
   // on orientation change.
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length !== 1) {
-      console.log('onViewableItemsChanged rejected because not exactly 1 viewable item');
+      console.log(
+        "onViewableItemsChanged rejected because not exactly 1 viewable item"
+      );
       return;
     }
 
     // reject the item change if it's in repsonse to an orientation change
     if (!scrollingRef.current) {
-      console.log('onViewableItemsChanged rejected because not during scroll');
+      const items = JSON.stringify(viewableItems.map( (item) => item.index ));
+      console.log(`onViewableItemsChanged ${items} rejected because not during scroll`);
       return;
     }
     const index = viewableItems[0].index;
     console.log("onViewableItemsChanged new image index = ", index);
     onIndexChanged(index);
     indexRef.current = index;
-    
   }, []);
 
-  const getItemLayout = (_, index) => ({
-    length: itemSize,
-    offset: itemSize * index,
-    index,
-  });
+  const getItemLayout = (_, index) => {
+    // console.log(`getItemLayout index=${index} size=${itemSize}`);
+    return {
+      length: itemSize,
+      offset: itemSize * index,
+      index,
+    };
+  };
 
   const onScrollBeginDrag = () => {
-    console.log('onScrollBeginDrag');
+    console.log("onScrollBeginDrag");
     scrollingRef.current = true;
-  }
+  };
 
   const onScrollEndDrag = () => {
-    console.log('onScrollEndDrag');
+    console.log("onScrollEndDrag");
     scrollingRef.current = false;
-  }
+  };
 
   const onMomentumScrollBegin = () => {
-    console.log('onMomentumScrollBegin');
+    console.log("onMomentumScrollBegin");
     scrollingRef.current = true;
-  }
+  };
 
   const onMomentumScrollEnd = () => {
-    console.log('onMomentumScrollEnd');
+    console.log("onMomentumScrollEnd");
     scrollingRef.current = false;
-  }
+  };
 
   const scrollToIndex = useCallback(() => {
     console.log("scrollToIndex scrollToIndex ", indexRef.current);
@@ -117,12 +144,27 @@ export const ImageFlatList = ({
     });
   }, []);
 
+  const onLayout = useCallback(() => {
+    console.log(`onLayout index=${indexRef.current}`);
+    flatListRef.current?.scrollToIndex({
+      animated: false,
+      index: indexRef.current,
+    });
+  }, []);
+
   return (
     <FlatList
       data={data}
-      renderItem={({ item }) => (
-        <MemoedImageItem item={item} screenDimensions={screenDimensions} />
-      )}
+      renderItem={ ({ item, index }) => {
+        console.log(`renderItem ${index} size=${itemSize}`)
+        return (
+          <MemoedImageItem item={item} itemSize={itemSize} />
+        );
+      }}
+      // renderItem={({ item, index }) => {
+      //   // console.log(`renderItem index=${index} itemSize=${itemSize}`);
+      //   return <Card index={index} itemHeight={itemSize} />;
+      // }}
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={onViewableItemsChanged}
       snapToAlignment="start"
@@ -138,7 +180,7 @@ export const ImageFlatList = ({
       onScrollEndDrag={onScrollEndDrag}
       onMomentumScrollBegin={onMomentumScrollBegin}
       onMomentumScrollEnd={onMomentumScrollEnd}
-      onLayout={scrollToIndex}
+      onLayout={onLayout}
       ref={flatListRef}
     />
   );
@@ -193,11 +235,34 @@ export const ImageCarouselSingleFlatListScreen = ({ route, navigation }) => {
   );
 };
 
+export const Card = ({ index, itemHeight }) => {
+  // console.log(`Card itemHeight=${itemHeight}`);
+  const heightStyle = {
+    height: itemHeight,
+  };
+  return (
+    <View style={[styles.card, heightStyle]}>
+      <Text style={styles.cardText}>{index}</Text>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   carousel: {
     flex: 1,
   },
   imageItem: {
     flex: 1,
+  },
+  card: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "cornsilk",
+  },
+  cardText: {
+    fontSize: 20,
+    color: "black",
   },
 });
