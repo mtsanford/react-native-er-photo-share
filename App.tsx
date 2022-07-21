@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import { ImagesContextProvider } from "./src/services/images/images.context";
@@ -21,9 +21,18 @@ function DetailsScreen() {
 }
 
 export default function App() {
+
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: 'white',
+    },
+  };
+
   return (
     <ImagesContextProvider>
-      <NavigationContainer>
+      <NavigationContainer theme={navTheme}>
         <RootStack.Navigator>
           <RootStack.Group>
             <RootStack.Screen
@@ -47,11 +56,3 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

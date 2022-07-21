@@ -1,45 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Image, ImageSourcePropType, ViewStyle, ImageStyle } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  ImageStyle,
+  LayoutChangeEvent,
+} from "react-native";
 import { Rect, Size } from "../infrastructure/types/geometry.types";
-import { fitRect } from "../infrastructure/fit-essential-rect";
-
+import { fitRect, sizeToRect } from "../infrastructure/fit-essential-rect";
 
 interface EssentialRectImageProps {
   src: string;
   essentialRect: Rect;
   imageSize: Size;
+
+  // If a client size is not privided, the image will not be shown until the onLayout event
+  clientSize?: Size;
 }
 
 export const EssentialRectImage = (props: EssentialRectImageProps) => {
-  const { src, essentialRect, imageSize } = props;
-  const [clientRect, setClientRect] = useState<Rect | null>(null);
-  // const mountedRef = useRef(true);
+  const { src, essentialRect, imageSize, clientSize: initialClientSize } = props;
+  const [clientSize, setClientSize] = useState<Size | undefined>(initialClientSize);
 
-  const imageRect: Rect = {
-    width: imageSize.width,
-    height: imageSize.height,
-    left: 0,
-    top: 0,
-  }
-
-  // useEffect(() => {
-  //   const start = Date.now();
-  //   Image.getSize(src, (width, height) => {
-  //     if (mountedRef.current) {
-  //       const duration = Date.now() - start;
-  //       console.log(`Image.getSize took ${duration}ms for ${src}`);
-  //       setImageRect({left: 0, top: 0, width, height});
-  //     }
-  //   }, (error) => {
-  //     console.log(error);
-  //   })
-
-  //   return () => { mountedRef.current = false };
-  // }, [src])
+  const clientRect = clientSize ? sizeToRect(clientSize) : undefined;
+  const imageRect = sizeToRect(imageSize);
 
   let imageStyles: ImageStyle = {};
 
-  if (clientRect && imageRect) {
+  if (clientRect) {
     const imageClientRect = fitRect(imageRect, essentialRect, clientRect);
     imageStyles = {
       top: imageClientRect.top,
@@ -50,19 +38,18 @@ export const EssentialRectImage = (props: EssentialRectImageProps) => {
     };
   }
 
-  const onLayout = (event) => {
+  const onLayout = (event: LayoutChangeEvent) => {
     var { width, height } = event.nativeEvent.layout;
-    setClientRect({
-      left: 0,
-      top: 0,
-      width,
-      height,
-    });
+    setClientSize((prevSize) =>
+      prevSize && prevSize.height === height && prevSize.width === width
+        ? prevSize
+        : { width, height }
+    );
   };
 
   return (
     <View style={ERstyles.container} onLayout={onLayout}>
-      {clientRect && imageRect && (
+      {clientRect && (
         <Image
           source={{ uri: src }}
           resizeMode="stretch"
@@ -80,12 +67,5 @@ const ERstyles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "black",
     position: "relative",
-  },
-  image: {
-    position: "absolute",
-    top: 50,
-    left: 50,
-    width: 300,
-    height: 134,
   },
 });

@@ -1,4 +1,4 @@
-import { Rect } from "./types/geometry.types";
+import { Rect, Size } from "./types/geometry.types";
 
 // image = | a |  e  |          b          |
 // view  = |   v    |
@@ -123,3 +123,9 @@ export const fitRect = (
 
   return adjustedFittedRect;
 };
+
+/************************************/
+
+export function sizeToRect(s: Size) {
+  return { left: 0, top: 0, width: s.width, height: s.height};
+}

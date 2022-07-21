@@ -13,49 +13,28 @@ import { ImagesContext } from "../../services/images/images.context";
 
 /****** MemoedImageItem ******/
 
-const ImageItem = ({ item, itemSize }) => {
-  // console.log(`ImageItem render...${screenDimensions.height} ${item.full}`);
+const ImageItem = ({ item, screenDimensions }) => {
   const containerStyle = {
-    width: '100%',
-    height: itemSize,
+    width: "100%",
+    height: screenDimensions.height,
   };
 
-  useEffect(() => {
-    () => {
-      console.log(
-        `ImageItem UNMOUNT...${item.full}`
-      );
-    };
-  }, []);
-
-  const onLayout = ({nativeEvent}) => {
-    // console.log(`onLayout`, nativeEvent);
-  }
-
   return (
-    <View style={containerStyle} onLayout={onLayout}>
-      <MemoedEssentialRectImage
+    <View style={containerStyle}>
+      <EssentialRectImage
         src={item.full}
         essentialRect={item.essentialRect}
         imageSize={item.size}
+        clientSize={screenDimensions}
       />
     </View>
   );
 };
 
-const essentialRectImagePropsAreEqual = (prev, next) => prev.src === next.src;
-
-const MemoedEssentialRectImage = React.memo(EssentialRectImage, essentialRectImagePropsAreEqual);
-
-// const imageItemPropsAreEqual = (prev, next) => {
-//   const result =
-//     prev.item.full === next.item.full &&
-//     prev.screenDimensions.width === next.screenDimensions.width &&
-//     prev.screenDimensions.height === next.screenDimensions.height;
-//   console.log(`imageItemPropsAreEqual ${result} ${next.item.full}`);
-//   return result;
-// };
-const imageItemPropsAreEqual = (prev, next) => (prev.item.full === next.item.full && prev.itemSize === next.itemSize);
+const imageItemPropsAreEqual = (prev, next) =>
+  prev.item.full === next.item.full &&
+  prev.screenDimensions.width === next.screenDimensions.width &&
+  prev.screenDimensions.height === next.screenDimensions.height;
 
 const MemoedImageItem = React.memo(ImageItem, imageItemPropsAreEqual);
 
@@ -77,6 +56,15 @@ export const ImageFlatList = ({
   const indexRef = useRef<number>(initialIndex);
   const itemSize = screenDimensions.height;
 
+  const currentSizeRef = useRef<number>(screenDimensions.height);
+  const newSizeRef = useRef<number>(screenDimensions.height);
+
+  // If we're rerendering based on orientation change, ignore all
+  // renderItems until onLayout
+  if (currentSizeRef.current !== itemSize) {
+    newSizeRef.current = itemSize;
+  }
+
   console.log(`ImageFlatList ${itemSize} initialIndex ${initialIndex}`);
 
   useEffect(() => {
@@ -88,17 +76,20 @@ export const ImageFlatList = ({
   // Keep track of which image item is "current", so that we can scroll to it
   // on orientation change.
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+    const items = JSON.stringify(viewableItems.map((item) => item.index));
+
     if (viewableItems.length !== 1) {
       console.log(
-        "onViewableItemsChanged rejected because not exactly 1 viewable item"
+        `onViewableItemsChanged ${items} rejected because not exactly 1 viewable item`
       );
       return;
     }
 
     // reject the item change if it's in repsonse to an orientation change
     if (!scrollingRef.current) {
-      const items = JSON.stringify(viewableItems.map( (item) => item.index ));
-      console.log(`onViewableItemsChanged ${items} rejected because not during scroll`);
+      console.log(
+        `onViewableItemsChanged ${items} rejected because not during scroll`
+      );
       return;
     }
     const index = viewableItems[0].index;
@@ -146,25 +137,26 @@ export const ImageFlatList = ({
 
   const onLayout = useCallback(() => {
     console.log(`onLayout index=${indexRef.current}`);
+    currentSizeRef.current = newSizeRef.current;
     flatListRef.current?.scrollToIndex({
       animated: false,
       index: indexRef.current,
     });
   }, []);
 
+  const onContentSizeChange = useCallback((w, h) => {
+    console.log(`onContentSizeChange ${w} ${h} index=${indexRef.current}`);
+  }, []);
+
   return (
     <FlatList
       data={data}
-      renderItem={ ({ item, index }) => {
-        console.log(`renderItem ${index} size=${itemSize}`)
+      renderItem={({ item, index }) => {
+        console.log(`renderItem ${index} size=${itemSize}`);
         return (
-          <MemoedImageItem item={item} itemSize={itemSize} />
+          <MemoedImageItem item={item} screenDimensions={screenDimensions} />
         );
       }}
-      // renderItem={({ item, index }) => {
-      //   // console.log(`renderItem index=${index} itemSize=${itemSize}`);
-      //   return <Card index={index} itemHeight={itemSize} />;
-      // }}
       viewabilityConfig={viewabilityConfig}
       onViewableItemsChanged={onViewableItemsChanged}
       snapToAlignment="start"
@@ -172,7 +164,7 @@ export const ImageFlatList = ({
       snapToInterval={itemSize}
       getItemLayout={getItemLayout}
       keyExtractor={(item) => item.id}
-      initialScrollIndex={initialIndex}
+      initialScrollIndex={indexRef.current}
       initialNumToRender={1}
       maxToRenderPerBatch={2}
       windowSize={5}
@@ -181,12 +173,13 @@ export const ImageFlatList = ({
       onMomentumScrollBegin={onMomentumScrollBegin}
       onMomentumScrollEnd={onMomentumScrollEnd}
       onLayout={onLayout}
+      onContentSizeChange={onContentSizeChange}
       ref={flatListRef}
     />
   );
 };
 
-export const ImageCarouselSingleFlatListScreen = ({ route, navigation }) => {
+export const ImageCarouselSingleFlatListScreen = ({ route }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
@@ -235,34 +228,13 @@ export const ImageCarouselSingleFlatListScreen = ({ route, navigation }) => {
   );
 };
 
-export const Card = ({ index, itemHeight }) => {
-  // console.log(`Card itemHeight=${itemHeight}`);
-  const heightStyle = {
-    height: itemHeight,
-  };
-  return (
-    <View style={[styles.card, heightStyle]}>
-      <Text style={styles.cardText}>{index}</Text>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   carousel: {
     flex: 1,
+    backgroundColor: "black",
   },
   imageItem: {
     flex: 1,
-  },
-  card: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "cornsilk",
-  },
-  cardText: {
-    fontSize: 20,
-    color: "black",
+    backgroundColor: "black",
   },
 });
