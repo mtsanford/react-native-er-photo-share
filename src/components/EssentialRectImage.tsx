@@ -65,7 +65,7 @@ const ERstyles = StyleSheet.create({
     width: "100%",
     height: "100%",
     overflow: "hidden",
-    backgroundColor: "black",
+    backgroundColor: "white",
     position: "relative",
   },
 });

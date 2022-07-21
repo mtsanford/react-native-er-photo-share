@@ -7,6 +7,6 @@ export interface Image {
     preview: string;
     full: string;
     essentialRect: Rect;
-    size?: Size;
+    size: Size;
 }
 
