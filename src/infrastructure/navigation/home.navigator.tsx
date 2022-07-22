@@ -17,6 +17,7 @@ export const HomeNavigator = () => (
   >
     <Tab.Screen
       options={{
+        headerShown: false,
         tabBarLabel: "Pictures",
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="image" color={color} size={size} />
