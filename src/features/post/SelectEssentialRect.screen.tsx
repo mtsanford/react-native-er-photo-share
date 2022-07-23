@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-function Ball() {
+function MovableImage() {
   const isPressed = useSharedValue(false);
   const offset = useSharedValue({ x: 0, y: 0 });
   const scale = useSharedValue(1);
@@ -41,24 +41,28 @@ function Ball() {
       isPressed.value = false;
     });
 
-    const pinchGesture = Gesture.Pinch()
+  const pinchGesture = Gesture.Pinch()
     .onBegin(() => {
       "worklet";
     })
     .onChange((e) => {
       "worklet";
-      console.log('pinch', e);
       scale.value *= e.scaleChange;
     })
     .onFinalize(() => {
       "worklet";
     });
 
-const composed = Gesture.Exclusive(panGesture, pinchGesture);
+  const composed = Gesture.Exclusive(panGesture, pinchGesture);
 
   return (
     <GestureDetector gesture={composed}>
-      <Animated.View style={[styles.ball, animatedStyles]} />
+      <Animated.Image
+        style={[styles.image, animatedStyles]}
+        source={{
+          uri: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images2%2Fpic01_full.jpg?alt=media&token=509e811d-4dba-4687-8994-4549279cdf7b",
+        }}
+      />
     </GestureDetector>
   );
 }
@@ -66,21 +70,34 @@ const composed = Gesture.Exclusive(panGesture, pinchGesture);
 export function SelectEssentialRectScreen() {
   return (
     <View style={styles.container}>
-      <Ball />
+      <MovableImage />
+      <View style={styles.overlayContainer} pointerEvents="box-none">
+        <View style={styles.overlay} pointerEvents="box-none" />
+      </View>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  ball: {
-    width: 300,
-    height: 300,
-    borderRadius: 100,
-    backgroundColor: "blue",
+  image: {
+    width: 1681,
+    height: 1600,
     alignSelf: "center",
+  },
+  overlayContainer: {
+    flex: 1,
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.5,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "red",
   },
 });
