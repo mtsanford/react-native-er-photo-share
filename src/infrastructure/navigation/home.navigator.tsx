@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { RecentImagesScreen } from "../../features/images/recent-images.screen"
 import { PostScreen } from "../../features/post/post.screen";
+import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
 import { ProfileScreen } from "../../features/profile/profile.screen";
 
 const Tab = createBottomTabNavigator();
@@ -34,7 +35,7 @@ export const HomeNavigator = () => (
         ),
       }}
       name="Post"
-      component={PostScreen}
+      component={SelectEssentialRectScreen}
     />
     <Tab.Screen
       options={{
