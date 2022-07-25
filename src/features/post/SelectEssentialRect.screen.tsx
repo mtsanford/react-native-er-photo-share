@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -7,38 +7,44 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-function MovableImage() {
-  const isPressed = useSharedValue(false);
-  const offset = useSharedValue({ x: 0, y: 0 });
+import { Size } from "../../infrastructure/types/geometry.types";
+
+function MovableImage({clientSize, imageSize}: {clientSize: Size, imageSize: Size}) {
+
+  const center = useSharedValue({ x: imageSize.width / 2, y: imageSize.height / 2 });
   const scale = useSharedValue(1);
 
   const animatedStyles = useAnimatedStyle(() => {
+    const imageOffsetX = center.value.x - imageSize.width / 2;
+    const imageOffsetY = center.value.y - imageSize.height / 2;
+    const translateX = (clientSize.width / 2) / scale.value - imageOffsetX;
+    const translateY = (clientSize.height / 2) / scale.value - imageOffsetY;
+
     return {
       transform: [
-        { translateX: offset.value.x },
-        { translateY: offset.value.y },
+        { translateX: - imageSize.width / 2 },
+        { translateY: - imageSize.height / 2 },
         { scale: scale.value },
-        // { scale: withSpring(isPressed.value ? 2 : 1) },
+        { translateX: translateX },
+        { translateY: translateY },
       ],
-      backgroundColor: isPressed.value ? "yellow" : "blue",
     };
   });
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
       "worklet";
-      isPressed.value = true;
     })
     .onChange((e) => {
       "worklet";
-      offset.value = {
-        x: e.changeX + offset.value.x,
-        y: e.changeY + offset.value.y,
+      center.value = {
+        x: center.value.x - e.changeX / scale.value,
+        y: center.value.y - e.changeY / scale.value,
       };
+      console.log('center scale was ', scale.value, center.value)
     })
     .onFinalize(() => {
       "worklet";
-      isPressed.value = false;
     });
 
   const pinchGesture = Gesture.Pinch()
@@ -48,6 +54,7 @@ function MovableImage() {
     .onChange((e) => {
       "worklet";
       scale.value *= e.scaleChange;
+      console.log('scale', scale.value)
     })
     .onFinalize(() => {
       "worklet";
@@ -56,7 +63,7 @@ function MovableImage() {
   const composed = Gesture.Exclusive(panGesture, pinchGesture);
 
   return (
-    <GestureDetector gesture={composed}>
+    <GestureDetector gesture={composed} style={{ flex: 1}}>
       <Animated.Image
         style={[styles.image, animatedStyles]}
         source={{
@@ -68,11 +75,28 @@ function MovableImage() {
 }
 
 export function SelectEssentialRectScreen() {
+  const [size, setSize] = useState<Size>();
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSize({ width, height });
+  };
+
+  useEffect(() => {}, []);
+
   return (
-    <View style={styles.container}>
-      <MovableImage />
-      <View style={styles.overlayContainer} pointerEvents="box-none">
-        <View style={styles.overlay} pointerEvents="box-none" />
+    <View style={styles.container} onLayout={onLayout}>
+      { size && <MovableImage clientSize={size} imageSize={{ width: 1681, height: 1600 }} />}
+      <View style={styles.overlayContainer} pointerEvents="none">
+        <View style={styles.overlay}>
+          <View style={styles.overlayVMargin} />
+          <View style={styles.overlayVMiddle}>
+            <View style={styles.overlayHMargin} />
+            <View style={styles.overlayCenter} />
+            <View style={styles.overlayHMargin} />
+          </View>
+          <View style={styles.overlayVMargin} />
+        </View>
       </View>
     </View>
   );
@@ -85,7 +109,6 @@ const styles = StyleSheet.create({
   image: {
     width: 1681,
     height: 1600,
-    alignSelf: "center",
   },
   overlayContainer: {
     flex: 1,
@@ -98,6 +121,21 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "red",
+  },
+  overlayVMargin: {
+    flexGrow: 1,
+    backgroundColor: "black",
+  },
+  overlayVMiddle: {
+    flexDirection: "row",
+  },
+  overlayHMargin: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  overlayCenter: {
+    backgroundColor: "transparent",
+    width: 300,
+    height: 300,
   },
 });

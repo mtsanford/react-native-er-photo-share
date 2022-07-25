@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { RecentImagesScreen } from "../../features/images/recent-images.screen"
 import { PostScreen } from "../../features/post/post.screen";
+import { TestTransform } from "../../features/post/test.screen";
 import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
 import { ProfileScreen } from "../../features/profile/profile.screen";
 
