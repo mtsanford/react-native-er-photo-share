@@ -36,7 +36,7 @@ export const HomeNavigator = () => (
         ),
       }}
       name="Post"
-      component={SelectEssentialRectScreen}
+      component={PostScreen}
     />
     <Tab.Screen
       options={{

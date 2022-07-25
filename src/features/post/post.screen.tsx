@@ -9,14 +9,14 @@ export const PostPlaceHolder = styled(View)`
   justify-content: center;
 `;
 
-export const PostScreen = () => {
+export const PostScreen = ({ navigation }) => {
   const [image, setImage] = useState(null);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -24,7 +24,11 @@ export const PostScreen = () => {
     console.log(result);
 
     if (!result.cancelled) {
-      setImage(result.uri);
+      // setImage(result.uri);
+      navigation.navigate('ERSelect', {
+        uri: result.uri,
+        imageSize: { width: result.width, height: result.height }
+      });
     }
   };
 

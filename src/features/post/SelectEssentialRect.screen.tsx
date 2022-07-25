@@ -5,25 +5,50 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  runOnJS,
 } from "react-native-reanimated";
 
 import { Size } from "../../infrastructure/types/geometry.types";
 
-function MovableImage({clientSize, imageSize}: {clientSize: Size, imageSize: Size}) {
+function MovableImage({
+  uri,
+  clientSize,
+  imageSize,
+  initialScale,
+  onChange,
+}: {
+  uri: string;
+  clientSize: Size;
+  imageSize: Size;
+  initialScale: number,
+  onChange: (_: any) => void,
+}) {
+  const center = useSharedValue({
+    x: imageSize.width / 2,
+    y: imageSize.height / 2,
+  });
+  const scale = useSharedValue(initialScale);
 
-  const center = useSharedValue({ x: imageSize.width / 2, y: imageSize.height / 2 });
-  const scale = useSharedValue(1);
+  const reportToParent = () => {
+    onChange({
+      scale: scale.value,
+      centerX: center.value.x,
+      centerY: center.value.y,
+    })
+  }
 
   const animatedStyles = useAnimatedStyle(() => {
     const imageOffsetX = center.value.x - imageSize.width / 2;
     const imageOffsetY = center.value.y - imageSize.height / 2;
-    const translateX = (clientSize.width / 2) / scale.value - imageOffsetX;
-    const translateY = (clientSize.height / 2) / scale.value - imageOffsetY;
+    const translateX = clientSize.width / 2 / scale.value - imageOffsetX;
+    const translateY = clientSize.height / 2 / scale.value - imageOffsetY;
 
     return {
+      width: imageSize.width,
+      height: imageSize.height,
       transform: [
-        { translateX: - imageSize.width / 2 },
-        { translateY: - imageSize.height / 2 },
+        { translateX: -imageSize.width / 2 },
+        { translateY: -imageSize.height / 2 },
         { scale: scale.value },
         { translateX: translateX },
         { translateY: translateY },
@@ -41,7 +66,7 @@ function MovableImage({clientSize, imageSize}: {clientSize: Size, imageSize: Siz
         x: center.value.x - e.changeX / scale.value,
         y: center.value.y - e.changeY / scale.value,
       };
-      console.log('center scale was ', scale.value, center.value)
+      runOnJS(reportToParent)();
     })
     .onFinalize(() => {
       "worklet";
@@ -54,7 +79,7 @@ function MovableImage({clientSize, imageSize}: {clientSize: Size, imageSize: Siz
     .onChange((e) => {
       "worklet";
       scale.value *= e.scaleChange;
-      console.log('scale', scale.value)
+      runOnJS(reportToParent)();
     })
     .onFinalize(() => {
       "worklet";
@@ -63,18 +88,18 @@ function MovableImage({clientSize, imageSize}: {clientSize: Size, imageSize: Siz
   const composed = Gesture.Exclusive(panGesture, pinchGesture);
 
   return (
-    <GestureDetector gesture={composed} style={{ flex: 1}}>
+    <GestureDetector gesture={composed}>
       <Animated.Image
-        style={[styles.image, animatedStyles]}
-        source={{
-          uri: "https://firebasestorage.googleapis.com/v0/b/er-react-native.appspot.com/o/images2%2Fpic01_full.jpg?alt=media&token=509e811d-4dba-4687-8994-4549279cdf7b",
-        }}
+        style={animatedStyles}
+        source={{ uri: uri }}
       />
     </GestureDetector>
   );
 }
 
-export function SelectEssentialRectScreen() {
+export function SelectEssentialRectScreen({ route }) {
+  const { uri, imageSize } = route.params;
+
   const [size, setSize] = useState<Size>();
 
   const onLayout = (e: LayoutChangeEvent) => {
@@ -82,11 +107,13 @@ export function SelectEssentialRectScreen() {
     setSize({ width, height });
   };
 
-  useEffect(() => {}, []);
+  const onChange = ( e ) => {
+    console.log(e);
+  }
 
   return (
     <View style={styles.container} onLayout={onLayout}>
-      { size && <MovableImage clientSize={size} imageSize={{ width: 1681, height: 1600 }} />}
+      {size && <MovableImage uri={uri} clientSize={size} imageSize={imageSize} initialScale={1} onChange={onChange} />}
       <View style={styles.overlayContainer} pointerEvents="none">
         <View style={styles.overlay}>
           <View style={styles.overlayVMargin} />
