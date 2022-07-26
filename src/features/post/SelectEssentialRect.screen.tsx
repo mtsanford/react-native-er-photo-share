@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import {
+  LayoutChangeEvent,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -20,8 +26,8 @@ function MovableImage({
   uri: string;
   clientSize: Size;
   imageSize: Size;
-  initialScale: number,
-  onChange: (_: any) => void,
+  initialScale: number;
+  onChange: (_: any) => void;
 }) {
   const center = useSharedValue({
     x: imageSize.width / 2,
@@ -34,8 +40,8 @@ function MovableImage({
       scale: scale.value,
       centerX: center.value.x,
       centerY: center.value.y,
-    })
-  }
+    });
+  };
 
   const animatedStyles = useAnimatedStyle(() => {
     const imageOffsetX = center.value.x - imageSize.width / 2;
@@ -89,15 +95,12 @@ function MovableImage({
 
   return (
     <GestureDetector gesture={composed}>
-      <Animated.Image
-        style={animatedStyles}
-        source={{ uri: uri }}
-      />
+      <Animated.Image style={animatedStyles} source={{ uri: uri }} />
     </GestureDetector>
   );
 }
 
-export function SelectEssentialRectScreen({ route }) {
+export function SelectEssentialRectScreen({ route, navigation }) {
   const { uri, imageSize } = route.params;
 
   const [size, setSize] = useState<Size>();
@@ -107,13 +110,36 @@ export function SelectEssentialRectScreen({ route }) {
     setSize({ width, height });
   };
 
-  const onChange = ( e ) => {
-    console.log(e);
+  const onChange = (e) => {
+    // console.log(e);
+  };
+
+  const onCancel = () => {
+    console.log('cancel');
+    navigation.goBack();
+  }
+
+  const onDone = () => {
+    navigation.navigate({
+      name: 'Post',
+      params: {
+        essentialRect: {left: 100, top: 100, width: 400, height: 400},
+      }
+    });
   }
 
   return (
     <View style={styles.container} onLayout={onLayout}>
-      {size && <MovableImage uri={uri} clientSize={size} imageSize={imageSize} initialScale={1} onChange={onChange} />}
+      {size && (
+        <MovableImage
+          uri={uri}
+          clientSize={size}
+          imageSize={imageSize}
+          initialScale={1}
+          onChange={onChange}
+        />
+      )}
+
       <View style={styles.overlayContainer} pointerEvents="none">
         <View style={styles.overlay}>
           <View style={styles.overlayVMargin} />
@@ -123,6 +149,18 @@ export function SelectEssentialRectScreen({ route }) {
             <View style={styles.overlayHMargin} />
           </View>
           <View style={styles.overlayVMargin} />
+        </View>
+      </View>
+
+      <View style={styles.controlsContainer} pointerEvents="box-none">
+        <View style={styles.controlsTop} pointerEvents="none" />
+        <View style={styles.controlsBottom} pointerEvents="box-none">
+          <TouchableOpacity onPress={onCancel}>
+            <Text style={styles.controlsText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onDone}>
+            <Text style={styles.controlsText}>Done</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -162,7 +200,34 @@ const styles = StyleSheet.create({
   },
   overlayCenter: {
     backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: 'white',
     width: 300,
     height: 300,
+  },
+
+  controlsContainer: {
+    flex: 1,
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+  },
+  controlsTop: {
+    flexGrow: 1,
+    backgroundColor: "transparent",
+  },
+  controlsBottom: {
+    flexGrow: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "black",
+  },
+  controlsText: {
+    color: "white",
+    fontSize: 20,
+    padding: 16,
+    paddingBottom: 32,
   },
 });
