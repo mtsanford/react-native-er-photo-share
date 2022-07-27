@@ -123,7 +123,7 @@ export function SelectEssentialRectScreen({ route, navigation }) {
     navigation.navigate({
       name: 'Post',
       params: {
-        essentialRect: {left: 100, top: 100, width: 400, height: 400},
+        essentialRect: {left: 500, top: 500, width: 1000, height: 1000},
       }
     });
   }
