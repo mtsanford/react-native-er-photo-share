@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   LayoutChangeEvent,
   StyleSheet,
@@ -14,7 +14,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 
-import { Size } from "../../infrastructure/types/geometry.types";
+import { Size, Rect } from "../../infrastructure/types/geometry.types";
 
 function MovableImage({
   uri,
@@ -36,11 +36,18 @@ function MovableImage({
   const scale = useSharedValue(initialScale);
 
   const reportToParent = () => {
-    onChange({
-      scale: scale.value,
-      centerX: center.value.x,
-      centerY: center.value.y,
-    });
+    const left = Math.ceil(Math.max(0, center.value.x - 150 / scale.value));
+    const top = Math.ceil(Math.max(0, center.value.y - 150 / scale.value));
+    const right = Math.floor(Math.min(imageSize.width, center.value.x + 150 / scale.value));
+    const bottom = Math.floor(Math.min(imageSize.height, center.value.y + 150 / scale.value));
+
+    const essentialRect: Rect = {
+      left,
+      top,
+      width: right - left,
+      height: bottom - top,
+    }
+    onChange(essentialRect);
   };
 
   const animatedStyles = useAnimatedStyle(() => {
@@ -104,6 +111,7 @@ export function SelectEssentialRectScreen({ route, navigation }) {
   const { uri, imageSize } = route.params;
 
   const [size, setSize] = useState<Size>();
+  const essentialRectRef = useRef<Rect>();
 
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -111,11 +119,10 @@ export function SelectEssentialRectScreen({ route, navigation }) {
   };
 
   const onChange = (e) => {
-    // console.log(e);
+    essentialRectRef.current = e;
   };
 
   const onCancel = () => {
-    console.log('cancel');
     navigation.goBack();
   }
 
@@ -123,7 +130,7 @@ export function SelectEssentialRectScreen({ route, navigation }) {
     navigation.navigate({
       name: 'Post',
       params: {
-        essentialRect: {left: 500, top: 500, width: 1000, height: 1000},
+        essentialRect: essentialRectRef.current,
       }
     });
   }
@@ -135,7 +142,7 @@ export function SelectEssentialRectScreen({ route, navigation }) {
           uri={uri}
           clientSize={size}
           imageSize={imageSize}
-          initialScale={1}
+          initialScale={600 / imageSize.width}
           onChange={onChange}
         />
       )}

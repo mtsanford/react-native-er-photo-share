@@ -15,6 +15,7 @@ import { Rect, Size } from "../infrastructure/types/geometry.types";
 import { fitRect, sizeToRect } from "../../infrastructure/fit-essential-rect";
 import { auth, storage } from "../../infrastructure/firebase";
 import { uploadString } from "firebase/storage";
+import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
 
 export const PostPlaceHolder = styled(View)`
   flex: 1;
@@ -26,10 +27,12 @@ export const PostScreen = ({ route, navigation }) => {
   const [image, setImage] = useState<string>();
   const uriRef = useRef<string>();
   const sizeRef = useRef<Size>();
+  const essentialRect = (route.params?.essentialRect);
 
-  const essentialRect = route.params?.essentialRect;
+  const uploadingRef = useRef<boolean>(false);
+  const uploadFinishedRef = useRef<boolean>(false);
 
-  console.log("essentialRect", essentialRect);
+  console.log("PostScreen essentialRect = ", essentialRect, 'uploadFinished = ', uploadFinishedRef.current);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -40,11 +43,10 @@ export const PostScreen = ({ route, navigation }) => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.cancelled) {
       uriRef.current = result.uri;
       sizeRef.current = { width: result.width, height: result.height };
+      uploadFinishedRef.current = false;
       navigation.navigate("ERSelect", {
         uri: result.uri,
         imageSize: { width: result.width, height: result.height },
@@ -52,22 +54,22 @@ export const PostScreen = ({ route, navigation }) => {
     }
   };
 
-  useEffect(() => {
+  if (!uploadingRef.current && !uploadFinishedRef.current && essentialRect) {
     const uploadImage = async () => {
       // Get the file
       const saveFilename = Date.now().toString();
       const file = uriRef.current;
 
-      if (!uriRef.current) return;
+      if (!uriRef.current || !sizeRef.current || !essentialRect) return;
 
       const thumbImage = await makeThumbNail(
         uriRef.current,
         sizeRef.current,
-        essentialRect
+        essentialRect,
       );
 
-      console.log("trumb returned", thumbImage.uri);
-      setImage(thumbImage.uri);
+      // console.log("trumb returned", thumbImage.uri);
+      // setImage(thumbImage.uri);
 
       const fullImage = await makeFullImage(uriRef.current, sizeRef.current);
       console.log("fullImage returned", fullImage.uri);
@@ -131,12 +133,16 @@ export const PostScreen = ({ route, navigation }) => {
         .then((url) => {
           console.log("full uploaded as ", url);
         });
+
+        uploadFinishedRef.current = true;
+        uploadingRef.current = false;
+    
     };
 
-    uploadImage();
-
     console.log("PostScreen effect");
-  }, [essentialRect]);
+    uploadingRef.current = true;
+    uploadImage();
+  }
 
   return (
     <PostPlaceHolder>
@@ -152,7 +158,7 @@ export const PostScreen = ({ route, navigation }) => {
 const makeFullImage = async (
   uri: string,
   size: Size,
-  maxEdge: number = 1600
+  maxEdge: number = 900,
 ) => {
   const scale = Math.max(size.width / maxEdge, size.height / maxEdge);
   const fullUri = await manipulateAsync(
@@ -175,7 +181,8 @@ const makeThumbNail = async (
     sizeToRect({ width: thumbnailSize, height: thumbnailSize })
   );
   const scale = fittedRect.width / size.width;
-  console.log("fittedRect", fittedRect);
+  // console.log("fittedRect", fittedRect);
+
   const thumbUri = await manipulateAsync(
     uri,
     [
