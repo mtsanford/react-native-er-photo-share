@@ -141,7 +141,7 @@ export const PostScreen = ({ route, navigation }) => {
 
     console.log("PostScreen effect");
     uploadingRef.current = true;
-    uploadImage();
+    // uploadImage();
   }
 
   return (
@@ -154,49 +154,3 @@ export const PostScreen = ({ route, navigation }) => {
   );
 };
 
-// make a new image with max edge of 1600
-const makeFullImage = async (
-  uri: string,
-  size: Size,
-  maxEdge: number = 900,
-) => {
-  const scale = Math.max(size.width / maxEdge, size.height / maxEdge);
-  const fullUri = await manipulateAsync(
-    uri,
-    [{ resize: { width: size.width / scale } }],
-    { compress: 0.6, format: SaveFormat.JPEG }
-  );
-  return fullUri;
-};
-
-const makeThumbNail = async (
-  uri: string,
-  size: Size,
-  essentialRect: Rect,
-  thumbnailSize: number = 256
-) => {
-  const fittedRect = fitRect(
-    sizeToRect(size),
-    essentialRect,
-    sizeToRect({ width: thumbnailSize, height: thumbnailSize })
-  );
-  const scale = fittedRect.width / size.width;
-  // console.log("fittedRect", fittedRect);
-
-  const thumbUri = await manipulateAsync(
-    uri,
-    [
-      { resize: { width: size.width * scale } },
-      {
-        crop: {
-          originX: -fittedRect.left,
-          originY: -fittedRect.top,
-          width: thumbnailSize,
-          height: thumbnailSize,
-        },
-      },
-    ],
-    { compress: 0.5, format: SaveFormat.JPEG }
-  );
-  return thumbUri;
-};

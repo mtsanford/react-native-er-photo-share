@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import {
   LayoutChangeEvent,
   StyleSheet,
@@ -15,6 +15,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Size, Rect } from "../../infrastructure/types/geometry.types";
+
+import { ImagesContext } from "../../services/images/images.context";
 
 function MovableImage({
   uri,
@@ -108,6 +110,8 @@ function MovableImage({
 }
 
 export function SelectEssentialRectScreen({ route, navigation }) {
+  const { upload } = useContext(ImagesContext);
+
   const { uri, imageSize } = route.params;
 
   const [size, setSize] = useState<Size>();
@@ -127,11 +131,15 @@ export function SelectEssentialRectScreen({ route, navigation }) {
   }
 
   const onDone = () => {
+    // kick off upload!
+    upload({
+      localUri: uri,
+      essentialRect: essentialRectRef.current, 
+      imageSize
+    });
+
     navigation.navigate({
       name: 'Post',
-      params: {
-        essentialRect: essentialRectRef.current,
-      }
     });
   }
 
