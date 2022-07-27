@@ -32,7 +32,7 @@ export const requestById = (id: string) => {
 const uploadFile = (path: string, blob: any): Promise<any> => {
   const promise = new Promise<any>((resolve, reject) => {
     const fileRef = ref(storage, path);
-    const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob);
+    const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob, { cacheControl: 'public, max-age=3600'});
     uploadTask
       .then((d) => getDownloadURL(fileRef))
       .then((url) => {
