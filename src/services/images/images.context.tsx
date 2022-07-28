@@ -54,17 +54,15 @@ export const ImagesContextProvider = ({ children }) => {
     setIsLoading(true);
     setRecentImages([]);
 
-    setTimeout(() => {
-      requestMostRecent()
-        .then((results) => {
-          setIsLoading(false);
-          setRecentImages(results);
-        })
-        .catch((err) => {
-          setIsLoading(false);
-          setError(err);
-        });
-    }, 2000);
+    requestMostRecent()
+      .then((results) => {
+        setIsLoading(false);
+        setRecentImages(results);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err);
+      });
   };
 
   useEffect(() => {

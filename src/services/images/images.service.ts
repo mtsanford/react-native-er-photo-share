@@ -6,17 +6,30 @@ import {
   UploadResult,
   UploadTask,
 } from "firebase/storage";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
-import { storage } from "../../infrastructure/firebase";
+import { storage, firestore } from "../../infrastructure/firebase";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
 import { fitRect, sizeToRect } from "../../infrastructure/fit-essential-rect";
 
 import { mockRecentResults, mockAllImages } from "./mock";
 
-export const requestMostRecent = () => {
-  return new Promise((resolve, reject) => {
-    resolve(mockRecentResults);
+export const requestMostRecent = async () => {
+  const images = collection(
+    firestore,
+    "images",
+  );
+  const q = query(images, orderBy("created", "desc"), limit(24));
+
+  const querySnapshot = await getDocs(q);
+  const recentImages = querySnapshot.docs.map((doc) => {
+    return {
+      ...doc.data(),
+      id: doc.id
+    }
   });
+
+  return recentImages;  
 };
 
 export const requestById = (id: string) => {
@@ -32,16 +45,18 @@ export const requestById = (id: string) => {
 const uploadFile = (path: string, blob: any): Promise<any> => {
   const promise = new Promise<any>((resolve, reject) => {
     const fileRef = ref(storage, path);
-    const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob, { cacheControl: 'public, max-age=3600'});
+    const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob, {
+      cacheControl: "public, max-age=3600",
+    });
     uploadTask
       .then((d) => getDownloadURL(fileRef))
       .then((url) => {
         console.log("uploaded as ", url);
-        resolve({ url: url })
+        resolve({ url: url });
       })
       .catch((e) => {
         console.log(e.message);
-        reject({ error: e.message })
+        reject({ error: e.message });
       });
   });
   return promise;
@@ -73,8 +88,10 @@ export const newPost = async ({
   const saveFilename = Date.now().toString();
 
   try {
-
-    const scale = Math.min(maxEdge / imageSize.width, maxEdge / imageSize.height);
+    const scale = Math.min(
+      maxEdge / imageSize.width,
+      maxEdge / imageSize.height
+    );
     const newWidth = imageSize.width * scale;
 
     const newEssentialRect = {
@@ -82,14 +99,14 @@ export const newPost = async ({
       top: Math.floor(essentialRect.top * scale),
       width: Math.floor(essentialRect.width * scale),
       height: Math.floor(essentialRect.height * scale),
-    }
+    };
 
     const newSize = {
       width: Math.floor(imageSize.width * scale),
       height: Math.floor(imageSize.height * scale),
-    }
+    };
 
-    console.log('newEssentialRect', newEssentialRect);
+    console.log("newEssentialRect", newEssentialRect);
 
     const thumbImage = await makeThumbNail(localUri, imageSize, essentialRect);
     const fullImage = await makeFullImage(localUri, newWidth);
@@ -116,20 +133,16 @@ export const newPost = async ({
       imageSize: newSize,
       essentialRect: newEssentialRect,
     };
-  }
-  catch (e) {
-    console.log('newPost failed' , e);
+  } catch (e) {
+    console.log("newPost failed", e);
     return {
       error: e as string,
-    }
+    };
   }
 };
 
 // make a new image with max edge of 1600
-const makeFullImage = async (
-  uri: string,
-  newWidth: number,
-) => {
+const makeFullImage = async (uri: string, newWidth: number) => {
   const fullUri = await manipulateAsync(
     uri,
     [{ resize: { width: newWidth } }],

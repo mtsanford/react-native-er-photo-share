@@ -115,12 +115,13 @@ export const RecentImagesScreen = ({ navigation }) => {
 
   const onLayout = (event) => {
     var { width, height } = event.nativeEvent.layout;
-    setNumColumns(calcColumns(width, height));
+    const numColumns = calcColumns(width, height);
+    setNumColumns(numColumns);
   };
 
   return (
     <SafeArea>
-      <View onLayout={onLayout}>
+      <View style={styles.container} onLayout={onLayout}>
         {(numColumns == 2) && <ImageList2Col images={recentImages} navigation={navigation} />}
         {(numColumns == 3) && <ImageList3Col images={recentImages} navigation={navigation} />}
         {(numColumns == 4) && <ImageList4Col images={recentImages} navigation={navigation} />}
@@ -131,6 +132,9 @@ export const RecentImagesScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   imagePreviewWrapper_2_column: {
     padding: 2,
     flex: 1 / 2,
