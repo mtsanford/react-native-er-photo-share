@@ -6,7 +6,7 @@ import {
   UploadResult,
   UploadTask,
 } from "firebase/storage";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 
 import { storage, firestore } from "../../infrastructure/firebase";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
@@ -48,6 +48,8 @@ const uploadFile = (path: string, blob: any): Promise<any> => {
     const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob, {
       cacheControl: "public, max-age=3600",
     });
+
+    // Note: uploadTask is not a JS promise
     uploadTask
       .then((d) => getDownloadURL(fileRef))
       .then((url) => {
@@ -70,7 +72,7 @@ export interface NewPostResult {
   essentialRect?: Rect;
 }
 
-const maxEdge = 960;
+const maxEdge = 1600;
 
 // Create a new post
 // - thumbnail
@@ -127,6 +129,19 @@ export const newPost = async ({
     const thumbResult = await uploadFile(thumbPath, thumbBlob);
     const fullResult = await uploadFile(fullPath, fullBlob);
 
+    const images = collection(
+      firestore,
+      "images",
+    );
+
+    const docRef = await addDoc(collection(firestore, "images"), {
+      full: fullResult.url,
+      preview: thumbResult.url,
+      essentialRect: newEssentialRect,
+      size: newSize,
+      created: serverTimestamp(),
+    });
+
     return {
       thumbnailUri: thumbResult.url,
       fullUri: fullResult.url,
@@ -146,7 +161,7 @@ const makeFullImage = async (uri: string, newWidth: number) => {
   const fullUri = await manipulateAsync(
     uri,
     [{ resize: { width: newWidth } }],
-    { compress: 0.6, format: SaveFormat.JPEG }
+    { compress: 0.8, format: SaveFormat.JPEG }
   );
   return fullUri;
 };
@@ -163,7 +178,6 @@ const makeThumbNail = async (
     sizeToRect({ width: thumbnailSize, height: thumbnailSize })
   );
   const scale = fittedRect.width / size.width;
-  // console.log("fittedRect", fittedRect);
 
   const thumbUri = await manipulateAsync(
     uri,

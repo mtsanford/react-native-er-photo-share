@@ -69,6 +69,10 @@ export const ImagesContextProvider = ({ children }) => {
     retrieveMostRecentImages();
   }, []);
 
+  const refresh = () => {
+    retrieveMostRecentImages();
+  }
+
   const upload = ({ localUri, essentialRect, imageSize }) => {
     if (uploadState.uploading) return;
 
@@ -83,18 +87,6 @@ export const ImagesContextProvider = ({ children }) => {
           thumbnailUri: result.thumbnailUri,
         });
 
-        setRecentImages([
-          {
-            id: Date.now(),
-            userId: "",
-            title: "",
-            preview: result.thumbnailUri as string,
-            full: result.fullUri as string,
-            essentialRect: result.essentialRect as Rect,
-            size: result.imageSize as Size,
-          },
-          ...recentImages,
-        ]);
       })
       .catch((e) => {
         dispatchUpload({
@@ -108,6 +100,7 @@ export const ImagesContextProvider = ({ children }) => {
     <ImagesContext.Provider
       value={{
         recentImages,
+        refresh,
         isLoading,
         error,
         uploadState,

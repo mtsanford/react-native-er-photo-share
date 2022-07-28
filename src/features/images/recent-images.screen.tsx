@@ -12,11 +12,19 @@ import { SafeArea } from "../../components/utility/safe-area.component";
 
 import { ImagesContext } from "../../services/images/images.context";
 
-const ImageList = styled(FlatList).attrs({
-  contentContainerStyle: {
-    padding: 4,
-  },
-})``;
+const ImageList = (props) => {
+  const { recentImages, isLoading, refresh } = useContext(ImagesContext);
+
+  const onRefresh = () => {
+    refresh();
+  }
+
+  return (
+    <FlatList {...props} contentContainerStyle={styles.contentContainer} refreshing={isLoading} onRefresh={onRefresh}>
+      {props.children}
+    </FlatList>
+  );
+};
 
 const ImageList2Col = ({ images, navigation }) => (
   <ImageList
@@ -30,7 +38,7 @@ const ImageList2Col = ({ images, navigation }) => (
         style={styles.imagePreviewWrapper_2_column}
       />
     )}
-    keyExtractor={(item) => item.id + '_2'}
+    keyExtractor={(item) => item.id + "_2"}
   />
 );
 
@@ -46,7 +54,7 @@ const ImageList3Col = ({ images, navigation }) => (
         style={styles.imagePreviewWrapper_3_column}
       />
     )}
-    keyExtractor={(item) => item.id + '_3'}
+    keyExtractor={(item) => item.id + "_3"}
   />
 );
 
@@ -62,7 +70,7 @@ const ImageList4Col = ({ images, navigation }) => (
         style={styles.imagePreviewWrapper_4_column}
       />
     )}
-    keyExtractor={(item) => item.id + '_4'}
+    keyExtractor={(item) => item.id + "_4"}
   />
 );
 
@@ -78,7 +86,7 @@ const ImageList5Col = ({ images, navigation }) => (
         style={styles.imagePreviewWrapper_5_column}
       />
     )}
-    keyExtractor={(item) => item.id + '_5'}
+    keyExtractor={(item) => item.id + "_5"}
   />
 );
 
@@ -101,7 +109,7 @@ const ImageItem = (props) => {
   return (
     <View style={style}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Carousel", { initialIndex: index} )} 
+        onPress={() => navigation.navigate("Carousel", { initialIndex: index })}
       >
         <ImagePreview source={{ uri: item.preview }} />
       </TouchableOpacity>
@@ -111,7 +119,7 @@ const ImageItem = (props) => {
 
 export const RecentImagesScreen = ({ navigation }) => {
   const { recentImages } = useContext(ImagesContext);
-  const [ numColumns, setNumColumns ] = useState(0);
+  const [numColumns, setNumColumns] = useState(0);
 
   const onLayout = (event) => {
     var { width, height } = event.nativeEvent.layout;
@@ -122,10 +130,18 @@ export const RecentImagesScreen = ({ navigation }) => {
   return (
     <SafeArea>
       <View style={styles.container} onLayout={onLayout}>
-        {(numColumns == 2) && <ImageList2Col images={recentImages} navigation={navigation} />}
-        {(numColumns == 3) && <ImageList3Col images={recentImages} navigation={navigation} />}
-        {(numColumns == 4) && <ImageList4Col images={recentImages} navigation={navigation} />}
-        {(numColumns == 5) && <ImageList5Col images={recentImages} navigation={navigation} />}
+        {numColumns == 2 && (
+          <ImageList2Col images={recentImages} navigation={navigation} />
+        )}
+        {numColumns == 3 && (
+          <ImageList3Col images={recentImages} navigation={navigation} />
+        )}
+        {numColumns == 4 && (
+          <ImageList4Col images={recentImages} navigation={navigation} />
+        )}
+        {numColumns == 5 && (
+          <ImageList5Col images={recentImages} navigation={navigation} />
+        )}
       </View>
     </SafeArea>
   );
@@ -154,5 +170,8 @@ const styles = StyleSheet.create({
     padding: 2,
     flex: 1 / 5,
     aspectRatio: 1,
+  },
+  contentContainer: {
+    padding: 4,
   },
 });
