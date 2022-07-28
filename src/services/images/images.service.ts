@@ -45,6 +45,7 @@ export const requestById = (id: string) => {
 const uploadFile = (path: string, blob: any): Promise<any> => {
   const promise = new Promise<any>((resolve, reject) => {
     const fileRef = ref(storage, path);
+
     const uploadTask: UploadTask = uploadBytesResumable(fileRef, blob, {
       cacheControl: "public, max-age=3600",
     });
@@ -90,6 +91,7 @@ export const newPost = async ({
   const saveFilename = Date.now().toString();
 
   try {
+    const extension = "jpg";
     const scale = Math.min(
       maxEdge / imageSize.width,
       maxEdge / imageSize.height
@@ -108,25 +110,19 @@ export const newPost = async ({
       height: Math.floor(imageSize.height * scale),
     };
 
-    console.log("newEssentialRect", newEssentialRect);
-
     const thumbImage = await makeThumbNail(localUri, imageSize, essentialRect);
-    const fullImage = await makeFullImage(localUri, newWidth);
-
-    // console.log("fullImage returned", fullImage.uri);
-    // console.log("trumb returned", thumbImage.uri);
-
     const thumbResponse = await fetch(thumbImage.uri);
-    const fullResponse = await fetch(fullImage.uri);
 
     const thumbBlob = await thumbResponse.blob();
-    const fullBlob = await fullResponse.blob();
-
-    const extension = "jpg";
     const thumbPath = `images3/${saveFilename}_thumb.${extension}`;
-    const fullPath = `images3/${saveFilename}_full.${extension}`;
-
     const thumbResult = await uploadFile(thumbPath, thumbBlob);
+
+    const fullImage = await makeFullImage(localUri, newWidth);
+    const fullResponse = await fetch(fullImage.uri);
+
+    const fullBlob = await fullResponse.blob();
+  
+    const fullPath = `images3/${saveFilename}_full.${extension}`;
     const fullResult = await uploadFile(fullPath, fullBlob);
 
     const images = collection(

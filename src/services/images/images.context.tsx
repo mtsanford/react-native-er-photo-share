@@ -77,7 +77,7 @@ export const ImagesContextProvider = ({ children }) => {
     if (uploadState.uploading) return;
 
     dispatchUpload({
-      type: "start",
+      type: "startUpload",
     });
 
     newPost({ localUri, essentialRect, imageSize })

@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button, Image, View, Platform, Text } from "react-native";
+import React, { useState, useRef, useContext, useEffect } from "react";
+import {
+  Button,
+  Image,
+  View,
+  Platform,
+  Text,
+  Animated,
+  Easing,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import styled from "styled-components/native";
-import {
-  ref,
-  getDownloadURL,
-  uploadBytesResumable,
-  UploadResult,
-  UploadTask,
-} from "firebase/storage";
-import { manipulateAsync, FlipType, SaveFormat } from "expo-image-manipulator";
+import Lottie from "lottie-react-native";
 
-import { Rect, Size } from "../infrastructure/types/geometry.types";
-import { fitRect, sizeToRect } from "../../infrastructure/fit-essential-rect";
-import { auth, storage } from "../../infrastructure/firebase";
-import { uploadString } from "firebase/storage";
-import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
+import { Size } from "../infrastructure/types/geometry.types";
+import { ImagesContext } from "../../services/images/images.context";
 
 export const PostPlaceHolder = styled(View)`
   flex: 1;
@@ -23,22 +21,49 @@ export const PostPlaceHolder = styled(View)`
   justify-content: center;
 `;
 
+export const AnimationWrapper = styled.View`
+  width: 500px;
+  height: 500px;
+  padding: 4px;
+`;
+
+  // position: absolute;
+  // top: 30px;
+
+
 export const PostScreen = ({ route, navigation }) => {
+  const { uploadState } = useContext(ImagesContext);
   const [image, setImage] = useState<string>();
+  const [ showUploadDone, setShowUploadDone] = useState<boolean>(false);
   const uriRef = useRef<string>();
   const sizeRef = useRef<Size>();
-  const essentialRect = (route.params?.essentialRect);
 
-  const uploadingRef = useRef<boolean>(false);
-  const uploadFinishedRef = useRef<boolean>(false);
+  const recentThumbRef = useRef<string>(uploadState.recentThumbnailUri);
 
-  console.log("PostScreen essentialRect = ", essentialRect, 'uploadFinished = ', uploadFinishedRef.current);
+  // console.log('showUploadDone', showUploadDone);
+
+  useEffect( () => {
+    let timer;
+    console.log('uploadState.uploading', uploadState.uploading)
+    // we've got a new uploaded image
+    if (!uploadState.uploading && recentThumbRef.current !== uploadState.recentThumbnailUri) {
+      recentThumbRef.current = uploadState.recentThumbnailUri;
+      setShowUploadDone(true);
+      timer = setTimeout(() => {
+        setShowUploadDone(false);
+      }, 1200)
+    }
+
+    return () => {
+      clearTimeout(timer);
+    }
+
+  }, [uploadState.uploading])
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      // allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -46,7 +71,6 @@ export const PostScreen = ({ route, navigation }) => {
     if (!result.cancelled) {
       uriRef.current = result.uri;
       sizeRef.current = { width: result.width, height: result.height };
-      uploadFinishedRef.current = false;
       navigation.navigate("ERSelect", {
         uri: result.uri,
         imageSize: { width: result.width, height: result.height },
@@ -54,103 +78,72 @@ export const PostScreen = ({ route, navigation }) => {
     }
   };
 
-  if (!uploadingRef.current && !uploadFinishedRef.current && essentialRect) {
-    const uploadImage = async () => {
-      // Get the file
-      const saveFilename = Date.now().toString();
-      const file = uriRef.current;
-
-      if (!uriRef.current || !sizeRef.current || !essentialRect) return;
-
-      const thumbImage = await makeThumbNail(
-        uriRef.current,
-        sizeRef.current,
-        essentialRect,
-      );
-
-      // console.log("trumb returned", thumbImage.uri);
-      // setImage(thumbImage.uri);
-
-      const fullImage = await makeFullImage(uriRef.current, sizeRef.current);
-      console.log("fullImage returned", fullImage.uri);
-
-      const thumbResponse = await fetch(thumbImage.uri);
-      const fullResponse = await fetch(fullImage.uri);
-
-      // if (!response.ok) {
-      //   console.log('failed to open ', uriRef.current)
-      // }
-
-      const thumbBlob = await thumbResponse.blob();
-      const fullBlob = await fullResponse.blob();
-
-      // console.log('response');
-      // console.log(response.type);
-      // console.log(response.ok);
-      // console.log(response.url);
-
-      //const extension = file?.type.split("/")[1];
-      const extension = "jpg";
-
-      // Makes reference to the storage bucket location
-      const thumbFileRef = ref(
-        storage,
-        `images3/${saveFilename}_thumb.${extension}`
-      );
-      const fullFileRef = ref(
-        storage,
-        `images3/${saveFilename}_full.${extension}`
-      );
-
-      // Starts the upload
-      const thumbUploadTask: UploadTask = uploadBytesResumable(
-        thumbFileRef,
-        thumbBlob
-      );
-      const fullUploadTask: UploadTask = uploadBytesResumable(
-        fullFileRef,
-        fullBlob
-      );
-
-      // Listen to updates to upload task
-      // thumbUploadTask.on("state_changed", (snapshot) => {
-      //   const pct = (
-      //     (snapshot.bytesTransferred / snapshot.totalBytes) *
-      //     100
-      //   ).toFixed(0);
-      //   // setProgress(pct);
-      // });
-
-      // Get downloadURL AFTER task resolves (Note: this is not a native Promise)
-      thumbUploadTask
-        .then((d) => getDownloadURL(thumbFileRef))
-        .then((url) => {
-          console.log("thumb uploaded as ", url);
-        });
-
-        fullUploadTask
-        .then((d) => getDownloadURL(fullFileRef))
-        .then((url) => {
-          console.log("full uploaded as ", url);
-        });
-
-        uploadFinishedRef.current = true;
-        uploadingRef.current = false;
-    
-    };
-
-    console.log("PostScreen effect");
-    uploadingRef.current = true;
-    // uploadImage();
-  }
+  const showUploading = uploadState.uploading;
+  const showUploadButton = !showUploading && !showUploadDone;
+  const showThumb = uploadState.recentThumbnailUri && !showUploading && !showUploadDone
 
   return (
     <PostPlaceHolder>
-      <Button title="Upload Picture" onPress={pickImage} />
-      {image && (
-        <Image source={{ uri: image }} style={{ width: 256, height: 256 }} />
+      { showUploadButton && <Button title="Upload Picture" onPress={pickImage} /> }
+      { showUploading && <Uploading /> }
+      { showUploadDone && <UploadDone />}
+
+      { showThumb && (
+        <Image source={{ uri: uploadState.recentThumbnailUri }} style={{ width: 256, height: 256 }} />
       )}
     </PostPlaceHolder>
   );
 };
 
+const UploadDone = () => {
+  const animationProgress = useRef(new Animated.Value(.433));
+  useEffect(() => {
+    () => {};
+  }, []);
+
+  useEffect(() => {
+    Animated.timing(animationProgress.current, {
+      toValue: 1,
+      duration: 800,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start();
+  }, []);
+
+  return (
+    <AnimationWrapper>
+      <Lottie
+        source={require("../../../assets/5414-image-uploading.json")}
+        progress={animationProgress.current}
+      />
+    </AnimationWrapper>
+  );
+};
+
+const Uploading = () => {
+  const animationProgress = useRef(new Animated.Value(0));
+  useEffect(() => {
+    () => {};
+  }, []);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(animationProgress.current, {
+        toValue: 0.433,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }),
+      { iterations: 1000 }
+    ).start();
+  }, []);
+
+  return (
+    <AnimationWrapper>
+      <Lottie
+        source={require("../../../assets/5414-image-uploading.json")}
+        progress={animationProgress.current}
+      />
+    </AnimationWrapper>
+  );
+};
