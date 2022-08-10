@@ -42,12 +42,12 @@ export const HomeNavigator = () => (
     />
     <Tab.Screen
       options={{
-        tabBarLabel: "Profile",
+        tabBarLabel: "Account",
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="person-outline" color={color} size={size} />
         ),
       }}
-      name="Profile"
+      name="Account"
       component={AccountNavigator}
     />
   </Tab.Navigator>

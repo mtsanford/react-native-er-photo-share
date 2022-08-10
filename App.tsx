@@ -7,11 +7,24 @@ import { ImagesContextProvider } from "./src/services/images/images.context";
 import { Navigation } from "./src/infrastructure/navigation";
 import { ThemeProvider } from "styled-components/native";
 import * as SplashScreen from "expo-splash-screen";
+import { initializeApp } from "firebase/app";
 
 import { useFonts as useInter, Inter_900Black } from "@expo-google-fonts/inter";
 
 import { theme } from "./src/infrastructure/theme";
-import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context"
+import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPwNgAee5ywYuGdRV3okEUA4mONg8qPP0",
+  authDomain: "er-react-native.firebaseapp.com",
+  projectId: "er-react-native",
+  storageBucket: "er-react-native.appspot.com",
+  messagingSenderId: "837080953025",
+  appId: "1:837080953025:web:af175092042898ad72e440",
+  measurementId: "G-F394ZLCVT0"
+};
+
+initializeApp(firebaseConfig);
 
 SplashScreen.preventAutoHideAsync();
 
