@@ -12,44 +12,34 @@ import { useFonts as useInter, Inter_900Black } from "@expo-google-fonts/inter";
 
 import { theme } from "./src/infrastructure/theme";
 
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 export default function App(): JSX.Element | null {
   let [fontsLoaded] = useInter({ Inter_900Black });
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
-      // This tells the splash screen to hide immediately! If we call this after
-      // `setAppIsReady`, then we may see a blank screen while the app is
-      // loading its initial state and rendering its first pixels. So instead,
-      // we hide the splash screen once we know the root view has already
-      // performed layout.
-      console.log('font loaded');
-      // await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
-  // if (!fontsLoaded) {
-  //   return null;
-  // }
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
-    <ThemeProvider theme={theme}>
-      <ImagesContextProvider>
-        <Navigation />
-      </ImagesContextProvider>
-    </ThemeProvider>
+    <View style={styles.rootView} onLayout={onLayoutRootView}>
+      <ThemeProvider theme={theme}>
+        <ImagesContextProvider>
+          <Navigation />
+        </ImagesContextProvider>
+      </ThemeProvider>
+    </View>
   );
-}
-
-{
-  /* <View style={styles.rootView} onLayout={onLayoutRootView}> */
 }
 
 const styles = StyleSheet.create({
   rootView: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
