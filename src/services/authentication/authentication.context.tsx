@@ -52,6 +52,7 @@ export const AuthenticationContextProvider: FC = ({ children }) => {
 
   useEffect(() => {
     const onStateChanged: NextOrObserver<FirebaseUser> = (user: FirebaseUser | null) => {
+      console.log('auth onStateChanged', user)
       setIsLoading(false);
       if (user) {
         setUser({
