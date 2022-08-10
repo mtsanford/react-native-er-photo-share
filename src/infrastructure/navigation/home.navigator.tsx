@@ -7,6 +7,7 @@ import { PostScreen } from "../../features/post/post.screen";
 import { TestTransform } from "../../features/post/test.screen";
 import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
 import { ProfileScreen } from "../../features/profile/profile.screen";
+import { LoginScreen } from "../../features/profile/login.screen";
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +47,7 @@ export const HomeNavigator = () => (
         ),
       }}
       name="Profile"
-      component={ProfileScreen}
+      component={LoginScreen}
     />
   </Tab.Navigator>
 );
