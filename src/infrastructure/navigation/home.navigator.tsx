@@ -7,8 +7,8 @@ import { PostScreen } from "../../features/post/post.screen";
 import { TestTransform } from "../../features/post/test.screen";
 import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
 import { ProfileScreen } from "../../features/profile/profile.screen";
-import { AccountNavigator } from "./account.navigator";
-import { LoginScreen } from "../../features/profile/login.screen";
+import { ProfileNavigator } from "./profile.navigator";
+import { LoginScreen } from "../../features/account/login.screen";
 
 const Tab = createBottomTabNavigator();
 
@@ -42,13 +42,13 @@ export const HomeNavigator = () => (
     />
     <Tab.Screen
       options={{
-        tabBarLabel: "Account",
+        tabBarLabel: "Profile",
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="person-outline" color={color} size={size} />
         ),
       }}
-      name="Account"
-      component={AccountNavigator}
+      name="Profile"
+      component={ProfileNavigator}
     />
   </Tab.Navigator>
 );

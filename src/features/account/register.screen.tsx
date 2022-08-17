@@ -9,12 +9,12 @@ import {
   AuthInput,
   ErrorContainer,
   Title,
-} from "./profile.styles";
+} from "./account.styles";
 import { Text } from "../../components/typography/text.component";
 import { Spacer } from "../../components/spacer/spacer.component";
 import { AuthenticationContext } from "../../services/authentication/authentication.context";
 
-export const LoginScreen: FC = ({ navigation }) => {
+export const RegisterScreen: FC = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { emailLogin, error, isLoading } = useContext(AuthenticationContext);
