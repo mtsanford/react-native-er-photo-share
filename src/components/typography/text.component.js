@@ -32,12 +32,20 @@ const label = (theme) => `
     font-weight: ${theme.fontWeights.medium};
 `;
 
+const link = (theme) => `
+    font-family: ${theme.fonts.heading};
+    font-size: ${theme.fontSizes.title};
+    font-weight: ${theme.fontWeights.medium};
+    color: ${theme.colors.text.link};
+`;
+
 const variants = {
   body,
   label,
   caption,
   error,
   hint,
+  link,
 };
 
 export const Text = styled.Text`

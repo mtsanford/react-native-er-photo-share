@@ -10,12 +10,8 @@ import {
   ErrorFn,
 } from "firebase/auth";
 
-export interface UserInterface {
-  id: string;
-  name: string | null;
-  photo: string | null;
-  email: string | null;
-}
+
+import { emailLogin, emailRegister as emailRegisterService, googleLogin, logout, UserInterface } from "./authentication.service";
 
 export interface AuthenticationContextInterface {
   isAuthenticated: boolean;
@@ -28,13 +24,11 @@ export interface AuthenticationContextInterface {
   logout: () => void;
 }
 
-import { emailLogin, emailRegister, googleLogin, logout } from "./authentication.service";
-
 const defaultAuthenticationContextInterface: AuthenticationContextInterface = {
   isAuthenticated: false,
   isLoading: false,
-  emailLogin,
-  emailRegister,
+  emailLogin: () => {},
+  emailRegister: () => {},
   googleLogin,
   logout,
 };
@@ -74,6 +68,24 @@ export const AuthenticationContextProvider: FC = ({ children }) => {
     const unsub = onAuthStateChanged(auth, onStateChanged, onError);
     return unsub;
   }, []);
+
+  const emailRegister = (email: string, password: string, repeatedPassword: string) => {
+    setIsLoading(true);
+    if (password !== repeatedPassword) {
+      setError("Error: Passwords do not match");
+      return;
+    }
+    
+    emailRegisterService(email, password, repeatedPassword)
+      .then((user: UserInterface) => {
+        setUser(user);
+        setIsLoading(false);
+      })
+      .catch((e) => {
+        setIsLoading(false);
+        setError(e);
+      });
+    };
 
   return (
     <AuthenticationContext.Provider

@@ -9,10 +9,6 @@ export const AccountBackground = styled.ImageBackground`
   justify-content: center;
 `;
 
-// {
-//   source: require("../../../../assets/home_bg.jpg"),
-// }
-
 export const AccountCover = styled.View`
   position: absolute;
   width: 100%;
@@ -38,6 +34,10 @@ export const AuthInput = styled(TextInput)`
 
 export const Title = styled(Text)`
   font-size: 30px;
+`;
+
+export const Subtitle = styled(Text)`
+  font-size: 24px;
 `;
 
 export const ErrorContainer = styled.View`
