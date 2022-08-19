@@ -12,3 +12,6 @@ export const theme = {
   fontSizes,
   fontWeights,
 };
+
+export type ThemeType = typeof theme; 
+
