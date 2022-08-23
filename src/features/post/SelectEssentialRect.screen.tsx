@@ -15,6 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Size, Rect } from "../../infrastructure/types/geometry.types";
+import { AuthenticationContext } from "../../services/authentication/authentication.context";
 
 import { ImagesContext } from "../../services/images/images.context";
 
@@ -111,6 +112,7 @@ function MovableImage({
 
 export function SelectEssentialRectScreen({ route, navigation }) {
   const { upload } = useContext(ImagesContext);
+  const { user } = useContext(AuthenticationContext);
 
   const { uri, imageSize } = route.params;
 
@@ -133,6 +135,7 @@ export function SelectEssentialRectScreen({ route, navigation }) {
   const onDone = () => {
     // kick off upload!
     upload({
+      uid: user?.id,
       localUri: uri,
       essentialRect: essentialRectRef.current, 
       imageSize

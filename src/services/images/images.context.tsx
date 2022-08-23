@@ -73,14 +73,14 @@ export const ImagesContextProvider = ({ children }) => {
     retrieveMostRecentImages();
   }
 
-  const upload = ({ localUri, essentialRect, imageSize }) => {
+  const upload = ({ uid, localUri, essentialRect, imageSize }) => {
     if (uploadState.uploading) return;
 
     dispatchUpload({
       type: "startUpload",
     });
 
-    newPost({ localUri, essentialRect, imageSize })
+    newPost({ uid, localUri, essentialRect, imageSize })
       .then((result) => {
         dispatchUpload({
           type: "uploaded",

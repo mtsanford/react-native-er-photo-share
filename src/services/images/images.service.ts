@@ -6,7 +6,7 @@ import {
   UploadResult,
   UploadTask,
 } from "firebase/storage";
-import { collection, query, orderBy, limit, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, collectionGroup, query, orderBy, limit, getDocs, addDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { storage, firestore } from "../../infrastructure/firebase";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
@@ -15,21 +15,30 @@ import { fitRect, sizeToRect } from "../../infrastructure/fit-essential-rect";
 import { mockRecentResults, mockAllImages } from "./mock";
 
 export const requestMostRecent = async () => {
-  const images = collection(
-    firestore,
-    "images",
-  );
-  const q = query(images, orderBy("created", "desc"), limit(24));
+  try {
+    const images = collectionGroup(
+      firestore,
+      "images",
+    );
+    const q = query(images, orderBy("created", "desc"), limit(24));
 
-  const querySnapshot = await getDocs(q);
-  const recentImages = querySnapshot.docs.map((doc) => {
+    const querySnapshot = await getDocs(q);
+    const recentImages = querySnapshot.docs.map((doc) => {
+      return {
+        ...doc.data(),
+        id: doc.id
+      }
+    });
+
+    console.log("recentImages", recentImages);
+    return recentImages;
+  }
+  catch (e) {
+    console.log("requestMostRecent failed", e);
     return {
-      ...doc.data(),
-      id: doc.id
-    }
-  });
-
-  return recentImages;  
+      error: e as string,
+    };
+  }
 };
 
 export const requestById = (id: string) => {
@@ -80,10 +89,12 @@ const maxEdge = 1600;
 // - full image
 // - firestore entry
 export const newPost = async ({
+  uid,
   localUri,
   essentialRect,
   imageSize,
 }: {
+  uid: string;
   localUri: string;
   essentialRect: Rect;
   imageSize: Size;
@@ -114,7 +125,7 @@ export const newPost = async ({
     const thumbResponse = await fetch(thumbImage.uri);
 
     const thumbBlob = await thumbResponse.blob();
-    const thumbPath = `images3/${saveFilename}_thumb.${extension}`;
+    const thumbPath = `users/${uid}/images/thumb/${saveFilename}.${extension}`;
     const thumbResult = await uploadFile(thumbPath, thumbBlob);
 
     const fullImage = await makeFullImage(localUri, newWidth);
@@ -122,7 +133,7 @@ export const newPost = async ({
 
     const fullBlob = await fullResponse.blob();
   
-    const fullPath = `images3/${saveFilename}_full.${extension}`;
+    const fullPath = `users/${uid}/images/full/${saveFilename}.${extension}`;
     const fullResult = await uploadFile(fullPath, fullBlob);
 
     const images = collection(
@@ -130,7 +141,7 @@ export const newPost = async ({
       "images",
     );
 
-    const docRef = await addDoc(collection(firestore, "images"), {
+    const docRef = await addDoc(collection(firestore, `users/${uid}/images`), {
       full: fullResult.url,
       preview: thumbResult.url,
       essentialRect: newEssentialRect,
