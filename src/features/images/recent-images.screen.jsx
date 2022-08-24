@@ -95,7 +95,7 @@ const ImagePreview = styled(Image)`
   height: 100%;
 `;
 
-const calcColumns = (width: number, height: number) => {
+const calcColumns = (width, height) => {
   const aspectRatio = width / height;
   // console.log(aspectRatio);
   if (aspectRatio > 1.9) return 5;
