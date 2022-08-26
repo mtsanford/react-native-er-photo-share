@@ -1,18 +1,13 @@
 import React, {
   useState,
-  useContext,
   createContext,
   useEffect,
   useReducer,
-  FC,
 } from "react";
 
 import { ImagesService } from "./images.service";
 import { Image } from "../../infrastructure/types/image.types";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
-
-
-export const ImagesContext = createContext();
 
 interface UploadState {
   uploading: boolean;
@@ -20,7 +15,23 @@ interface UploadState {
   recentThumbnailUri?: string;
 }
 
-type UploadAction = any;
+interface UploadAction {
+  type: "startUpload" | "uploaded" | "error";
+  thumbnailUri?: string;
+  error?: string;
+}
+
+interface ImagesContextInterface {
+  recentImages: Image[],
+  refresh: () => void,
+  isLoading: boolean,
+  error?: string,
+  uploadState: UploadState,
+  upload: ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: Size }) => void;
+}
+
+export const ImagesContext = createContext<ImagesContextInterface | null>(null);
+
 
 const uploadReducer = (
   state: UploadState,
@@ -43,10 +54,15 @@ const initialUploadState: UploadState = {
   recentThumbnailUri: undefined,
 };
 
-export const ImagesContextProvider = ({ children, service }) => {
+
+type ImagesContextProviderProps = {
+  service: ImagesService,
+}
+
+export const ImagesContextProvider: React.FC<ImagesContextProviderProps> = ({ children, service }) => {
   const [recentImages, setRecentImages] = useState<Array<Image>>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
   const [uploadState, dispatchUpload] = useReducer(
     uploadReducer,
     initialUploadState
@@ -75,7 +91,7 @@ export const ImagesContextProvider = ({ children, service }) => {
     retrieveMostRecentImages();
   }
 
-  const upload = ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: number }) => {
+  const upload = ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: Size }) => {
     if (uploadState.uploading) return;
 
     dispatchUpload({

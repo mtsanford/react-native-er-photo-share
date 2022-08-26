@@ -12,7 +12,7 @@ import * as ImagePicker from "expo-image-picker";
 import styled from "styled-components/native";
 import Lottie from "lottie-react-native";
 
-import { Size } from "../infrastructure/types/geometry.types";
+import { Size } from "../../infrastructure/types/geometry.types";
 import { ImagesContext } from "../../services/images/images.context";
 
 export const PostPlaceHolder = styled(View)`

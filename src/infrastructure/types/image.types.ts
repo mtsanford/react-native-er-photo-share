@@ -2,6 +2,7 @@ import { Rect, Size } from './geometry.types';
 
 export interface Image {
     id: string;
+    created: Date;
     userId: string;
     title: string;
     preview: string;

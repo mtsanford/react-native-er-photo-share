@@ -11,8 +11,9 @@ import { collection, collectionGroup, query, orderBy, limit, getDocs, addDoc, se
 import { storage, firestore } from "../../infrastructure/firebase";
 
 
-import { ImagesService, ImagePost, NewPostResult } from "./images.service";
+import { ImagesService, NewPostResult } from "./images.service";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
+import { Image } from "../../infrastructure/types/image.types";
 import { fitRect, sizeToRect } from "../../infrastructure/fit-essential-rect";
 
 import { mockRecentResults, mockAllImages } from "./mock";
@@ -30,7 +31,7 @@ const requestMostRecent = async () => {
       return {
         ...doc.data(),
         id: doc.id
-      } as ImagePost
+      } as Image
     });
 
     console.log("recentImages", recentImages);
