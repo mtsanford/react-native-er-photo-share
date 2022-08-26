@@ -30,6 +30,7 @@ const requestMostRecent = async () => {
     const recentImages = querySnapshot.docs.map((doc) => {
       return {
         ...doc.data(),
+        created: doc.data().created.toDate(),
         id: doc.id
       } as Image
     });
