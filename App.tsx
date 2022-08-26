@@ -13,6 +13,7 @@ import { useFonts as useInter, Inter_900Black } from "@expo-google-fonts/inter";
 
 import { theme } from "./src/infrastructure/theme";
 import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
+import { FirebaseImagesService } from "./src/services/images/firebase.images.service";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPwNgAee5ywYuGdRV3okEUA4mONg8qPP0",
@@ -45,7 +46,7 @@ export default function App(): JSX.Element | null {
     <View style={styles.rootView} onLayout={onLayoutRootView}>
       <ThemeProvider theme={theme}>
         <AuthenticationContextProvider>
-          <ImagesContextProvider>
+          <ImagesContextProvider service={FirebaseImagesService}>
             <Navigation />
           </ImagesContextProvider>
         </AuthenticationContextProvider>

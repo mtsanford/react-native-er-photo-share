@@ -126,6 +126,6 @@ export const fitRect = (
 
 /************************************/
 
-export function sizeToRect(s: Size) {
+export function sizeToRect(s: Size): Rect {
   return { left: 0, top: 0, width: s.width, height: s.height};
 }

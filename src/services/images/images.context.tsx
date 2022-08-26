@@ -4,11 +4,13 @@ import React, {
   createContext,
   useEffect,
   useReducer,
+  FC,
 } from "react";
 
-import { requestMostRecent, newPost } from "./images.service";
+import { ImagesService } from "./images.service";
 import { Image } from "../../infrastructure/types/image.types";
 import { Rect, Size } from "../../infrastructure/types/geometry.types";
+
 
 export const ImagesContext = createContext();
 
@@ -41,7 +43,7 @@ const initialUploadState: UploadState = {
   recentThumbnailUri: undefined,
 };
 
-export const ImagesContextProvider = ({ children }) => {
+export const ImagesContextProvider = ({ children, service }) => {
   const [recentImages, setRecentImages] = useState<Array<Image>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,7 +56,7 @@ export const ImagesContextProvider = ({ children }) => {
     setIsLoading(true);
     setRecentImages([]);
 
-    requestMostRecent()
+    service.requestMostRecent()
       .then((results) => {
         setIsLoading(false);
         setRecentImages(results);
@@ -73,14 +75,14 @@ export const ImagesContextProvider = ({ children }) => {
     retrieveMostRecentImages();
   }
 
-  const upload = ({ uid, localUri, essentialRect, imageSize }) => {
+  const upload = ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: number }) => {
     if (uploadState.uploading) return;
 
     dispatchUpload({
       type: "startUpload",
     });
 
-    newPost({ uid, localUri, essentialRect, imageSize })
+    service.newPost({ uid, localUri, essentialRect, imageSize })
       .then((result) => {
         dispatchUpload({
           type: "uploaded",
