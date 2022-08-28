@@ -72,9 +72,13 @@ const Title = styled(Text)`
   padding: 4px;
 `;
 
-const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo = true, image }) => {
+const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
+  const style = {
+    opacity: showInfo ? 1 : 0.2
+  };
+
   return (
-    <View style={styles.overlay} pointerEvents="box-none">
+    <View style={[styles.overlay, style]} pointerEvents="box-none">
       <SafeArea pointerEvents="box-none">
         <View style={styles.detailsInner} pointerEvents="box-none">
           <Title>{image.title}</Title>
@@ -101,9 +105,10 @@ interface ImageCarouselFlatListProps {
   images: Image[];
   initialIndex: number;
   onIndexChange: (index: number) => void;
+  onScrollingChange: ( isScrolling: boolean) => void;
 }
 
-export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialIndex, onIndexChange, images }) => {
+export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialIndex, onIndexChange, images, onScrollingChange }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
@@ -154,20 +159,28 @@ export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialI
     };
   };
 
+  const changeScrolling = (newValue: boolean) => {
+    const oldValue = scrollingRef.current;
+    scrollingRef.current = newValue;
+    if (newValue !== oldValue) {
+      onScrollingChange(newValue);
+    }
+  }
+
   const onScrollBeginDrag = () => {
-    scrollingRef.current = true;
+    changeScrolling(true);
   };
 
   const onScrollEndDrag = () => {
-    scrollingRef.current = false;
+    changeScrolling(false);
   };
 
   const onMomentumScrollBegin = () => {
-    scrollingRef.current = true;
+    changeScrolling(true);
   };
 
   const onMomentumScrollEnd = () => {
-    scrollingRef.current = false;
+    changeScrolling(false);
   };
 
   const onLayout = useCallback(() => {
@@ -212,6 +225,7 @@ export const ImageCarouselScreen: FC<ImageCarouselScreenProps> = ({ route, navig
   const initialIndex = route.params?.initialIndex;
   const { recentImages } = useContext(ImagesContext);
   const [ currentImage, setCurrentImage ] = useState<Image>(recentImages[initialIndex])
+  const [ showInfo, setShowInfo ] = useState(true);
 
   const onClose = () => {
     navigation.goBack();
@@ -221,11 +235,15 @@ export const ImageCarouselScreen: FC<ImageCarouselScreenProps> = ({ route, navig
     setCurrentImage(recentImages[index]);
   }
 
+  const onScrollingChange = (newValue: boolean) => {
+    setShowInfo(!newValue);
+  }
+
   return (
     <View style={styles.carousel}>
       <CloseOverlay onClose={onClose} />
-      <DetailsOverlay showInfo={false} image={currentImage} />
-      <ImageCarouselFlatList images={recentImages} initialIndex={initialIndex} onIndexChange={onIndexChange} />
+      <DetailsOverlay showInfo={showInfo} image={currentImage} />
+      <ImageCarouselFlatList images={recentImages} initialIndex={initialIndex} onIndexChange={onIndexChange} onScrollingChange={onScrollingChange}/>
     </View>
   );
 };
