@@ -15,6 +15,13 @@ interface UploadState {
   recentThumbnailUri?: string;
 }
 
+const initialUploadState: UploadState = {
+  uploading: false,
+  recentError: undefined,
+  recentThumbnailUri: undefined,
+};
+
+
 interface UploadAction {
   type: "startUpload" | "uploaded" | "error";
   thumbnailUri?: string;
@@ -30,7 +37,15 @@ interface ImagesContextInterface {
   upload: ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: Size }) => void;
 }
 
-export const ImagesContext = createContext<ImagesContextInterface | null>(null);
+const defaultImagesContextInterface: ImagesContextInterface = {
+  recentImages: [],
+  refresh: () => {},
+  isLoading: false,
+  uploadState: initialUploadState,
+  upload: ({ uid, localUri, essentialRect, imageSize }: { uid: string, localUri: string, essentialRect: Rect, imageSize: Size }) => {},
+}
+
+export const ImagesContext = createContext<ImagesContextInterface>(defaultImagesContextInterface);
 
 
 const uploadReducer = (
@@ -48,11 +63,6 @@ const uploadReducer = (
   return { ...state };
 };
 
-const initialUploadState: UploadState = {
-  uploading: false,
-  recentError: undefined,
-  recentThumbnailUri: undefined,
-};
 
 
 type ImagesContextProviderProps = {
