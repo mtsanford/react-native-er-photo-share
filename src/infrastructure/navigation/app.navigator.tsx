@@ -4,9 +4,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { HomeNavigator } from "./home.navigator";
 import { ImageCarouselScreen } from "../../features/images/image-carousel.screen";
 import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
+import { AppStackParamList } from "./params";
 
 
-const RootStack = createStackNavigator();
+const RootStack = createStackNavigator<AppStackParamList>();
 
 export const AppNavigator = () => {
   return (

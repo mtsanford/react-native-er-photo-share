@@ -10,12 +10,15 @@ import { Dimensions, ScaledSize, ViewabilityConfig } from "react-native";
 import { FlatList, View, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
+import { StackScreenProps } from "@react-navigation/stack";
 
 import { EssentialRectImage } from "../../components/EssentialRectImage";
 import { ImagesContext } from "../../services/images/images.context";
 import { Image } from '../../infrastructure/types/image.types';
 import { Size } from '../../infrastructure/types/geometry.types';
 import { SafeArea } from "../../components/utility/safe-area.component";
+import { AppStackParamList } from "../../infrastructure/navigation/params";
+import { onChange } from "react-native-reanimated";
 
 /****** MemoedImageItem ******/
 
@@ -43,11 +46,15 @@ const ImageItem = ({ item, screenDimensions }: ImageItemProps) => {
 };
 
 
-const CloseOverlay: FC = () => {
+interface CloseOverlayProps {
+  onClose: () => void,
+}
+
+const CloseOverlay: FC<CloseOverlayProps> = ( {onClose} ) => {
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <SafeArea pointerEvents="box-none">
-          <Ionicons name="close-circle-outline" size={30} color="black" style={styles.closeStyle} />
+          <Ionicons name="close-circle-outline" size={30} color="black" style={styles.closeStyle} onPress={onClose}/>
       </SafeArea>
     </View>
   )
@@ -193,12 +200,18 @@ export const ImageCarouselFlatList = ({ initialIndex } : { initialIndex : number
 
 /************/
 
-export const ImageCarouselScreen = ({ route }) => {
+type ImageCarouselScreenProps = StackScreenProps<AppStackParamList, 'Carousel'>;
+
+export const ImageCarouselScreen: FC<ImageCarouselScreenProps> = ({ route, navigation }) => {
   const initialIndex = route.params?.initialIndex;
+
+  const onClose = () => {
+    navigation.goBack();
+  }
 
   return (
     <View style={styles.carousel}>
-      <CloseOverlay />
+      <CloseOverlay onClose={onClose} />
       <DetailsOverlay showInfo={false} />
       <ImageCarouselFlatList initialIndex={initialIndex} />
     </View>
