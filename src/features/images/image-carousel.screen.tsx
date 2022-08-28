@@ -62,6 +62,7 @@ const CloseOverlay: FC<CloseOverlayProps> = ( {onClose} ) => {
 
 interface DetailsOverlayProps {
   showInfo?: boolean;
+  image: Image;
 }
 
 const Title = styled(Text)`
@@ -71,12 +72,12 @@ const Title = styled(Text)`
   padding: 4px;
 `;
 
-const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo = true }) => {
+const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo = true, image }) => {
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <SafeArea pointerEvents="box-none">
         <View style={styles.detailsInner} pointerEvents="box-none">
-          <Title>This is the title!</Title>
+          <Title>{image.title}</Title>
         </View>
       </SafeArea>
     </View>
@@ -96,14 +97,19 @@ const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: 90,
 };
 
-export const ImageCarouselFlatList = ({ initialIndex } : { initialIndex : number }) => {
+interface ImageCarouselFlatListProps {
+  images: Image[];
+  initialIndex: number;
+  onIndexChange: (index: number) => void;
+}
+
+export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialIndex, onIndexChange, images }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
   const scrollingRef = useRef<boolean>(false);
   const flatListRef = useRef<FlatList<Image>>();
   const indexRef = useRef<number>(initialIndex);
-  const { recentImages } = useContext(ImagesContext);
 
   const itemSize = screenDimensions.height;
 
@@ -137,6 +143,7 @@ export const ImageCarouselFlatList = ({ initialIndex } : { initialIndex : number
 
     const index = viewableItems[0].index;
     indexRef.current = index;
+    onIndexChange(indexRef.current);
   }, []);
 
   const getItemLayout = (_, index) => {
@@ -172,7 +179,7 @@ export const ImageCarouselFlatList = ({ initialIndex } : { initialIndex : number
 
   return (
       <FlatList
-        data={recentImages}
+        data={images}
         renderItem={({ item }) => (
           <MemoedImageItem item={item} screenDimensions={screenDimensions} />
         )}
@@ -183,7 +190,6 @@ export const ImageCarouselFlatList = ({ initialIndex } : { initialIndex : number
         snapToInterval={itemSize}
         getItemLayout={getItemLayout}
         keyExtractor={(item) => item.id}
-        initialScrollIndex={indexRef.current}
         initialNumToRender={1}
         maxToRenderPerBatch={2}
         windowSize={5}
@@ -204,16 +210,22 @@ type ImageCarouselScreenProps = StackScreenProps<AppStackParamList, 'Carousel'>;
 
 export const ImageCarouselScreen: FC<ImageCarouselScreenProps> = ({ route, navigation }) => {
   const initialIndex = route.params?.initialIndex;
+  const { recentImages } = useContext(ImagesContext);
+  const [ currentImage, setCurrentImage ] = useState<Image>(recentImages[initialIndex])
 
   const onClose = () => {
     navigation.goBack();
   }
 
+  const onIndexChange = (index: number) => {
+    setCurrentImage(recentImages[index]);
+  }
+
   return (
     <View style={styles.carousel}>
       <CloseOverlay onClose={onClose} />
-      <DetailsOverlay showInfo={false} />
-      <ImageCarouselFlatList initialIndex={initialIndex} />
+      <DetailsOverlay showInfo={false} image={currentImage} />
+      <ImageCarouselFlatList images={recentImages} initialIndex={initialIndex} onIndexChange={onIndexChange} />
     </View>
   );
 };
