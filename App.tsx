@@ -3,7 +3,6 @@ import "react-native-gesture-handler";
 
 import { useCallback, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { ImagesContextProvider } from "./src/services/images/images.context";
 import { Navigation } from "./src/infrastructure/navigation";
 import { ThemeProvider } from "styled-components/native";
 import * as SplashScreen from "expo-splash-screen";
@@ -12,7 +11,11 @@ import { initializeApp } from "firebase/app";
 import { useFonts as useInter, Inter_900Black } from "@expo-google-fonts/inter";
 
 import { theme } from "./src/infrastructure/theme";
+
 import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
+import { FirebaseAuthenticationService } from "./src/services/authentication/firebase.authentication.service";
+
+import { ImagesContextProvider } from "./src/services/images/images.context";
 import { FirebaseImagesService } from "./src/services/images/firebase.images.service";
 import { MockImagesService } from "./src/services/images/mock.images.service";
 
@@ -46,7 +49,7 @@ export default function App(): JSX.Element | null {
   return (
     <View style={styles.rootView} onLayout={onLayoutRootView}>
       <ThemeProvider theme={theme}>
-        <AuthenticationContextProvider>
+        <AuthenticationContextProvider service={FirebaseAuthenticationService}>
           <ImagesContextProvider service={MockImagesService}>
             <Navigation />
           </ImagesContextProvider>

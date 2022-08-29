@@ -1,91 +1,77 @@
 import React, { useState, createContext, FC, useEffect } from "react";
 
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  NextOrObserver,
-  User as FirebaseUser,
-  ErrorFn,
-} from "firebase/auth";
-
-
-import { emailLogin, emailRegister as emailRegisterService, googleLogin, logout, UserInterface } from "./authentication.service";
+import { User } from "../../infrastructure/types/user.types";
+import { AuthenticationService } from "./authentication.service";
 
 export interface AuthenticationContextInterface {
   isAuthenticated: boolean;
   isLoading: boolean;
   error?: string;
-  user?: UserInterface;
-  emailLogin: (email: string, password: string) => void;
+  user?: User;
+  emailLogin: AuthenticationService["emailLogin"];
   emailRegister: (email: string, password: string, repeatedPassword: string) => void;
-  googleLogin: () => void;
-  logout: () => void;
+  googleLogin: AuthenticationService["googleLogin"];
+  logout: AuthenticationService["logout"];
 }
 
 const defaultAuthenticationContextInterface: AuthenticationContextInterface = {
   isAuthenticated: false,
   isLoading: false,
-  emailLogin: () => {},
-  emailRegister: () => {},
-  googleLogin,
-  logout,
+  emailLogin: (email: string, password: string) => {},
+  emailRegister: (email: string, password: string, repeatedPassword: string) => {} ,
+  googleLogin: () => {},
+  logout: () => {},
 };
 
 export const AuthenticationContext = createContext<AuthenticationContextInterface>(
   defaultAuthenticationContextInterface
 );
 
-const auth = getAuth();
 
-export const AuthenticationContextProvider: FC = ({ children }) => {
+type AuthenticationContextProviderProps = {
+  service: AuthenticationService
+}
+
+export const AuthenticationContextProvider: FC<AuthenticationContextProviderProps> = ({ children, service }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<UserInterface>();
+  const [user, setUser] = useState<User>();
   const [error, setError] = useState<string>();
 
+  const { emailLogin, emailRegister: emailRegisterService, googleLogin, logout, subscribeUserChange } = service;
+
   useEffect(() => {
-    const onStateChanged: NextOrObserver<FirebaseUser> = (user: FirebaseUser | null) => {
-      console.log('auth onStateChanged', user)
+    const onUserChanged = (user: User | null) => {
       setIsLoading(false);
       if (user) {
         setUser({
-          id: user.uid,
-          name: user.displayName,
+          uid: user.uid,
+          displayName: user.displayName,
           email: user.email,
-          photo: user.photoURL,
+          photoURL: user.photoURL,
         });
         setError(undefined);
       } else {
         setUser(undefined);
       }
+    }
+
+    const onError = (error: string) => {
+      setError(error);
     };
 
-    const onError: ErrorFn = (error: Error) => {
-      setError(error.message);
-    };
-
-    const unsub = onAuthStateChanged(auth, onStateChanged, onError);
+    const unsub = subscribeUserChange(onUserChanged, onError);
     return unsub;
   }, []);
 
-  const emailRegister = (email: string, password: string, repeatedPassword: string) => {
+  const emailRegisterHandler = (email: string, password: string, repeatedPassword: string) => {
     setIsLoading(true);
     if (password !== repeatedPassword) {
       setError("Error: Passwords do not match");
       return;
     }
     
-    emailRegisterService(email, password, repeatedPassword)
-      .then((user: UserInterface) => {
-        setUser(user);
-        setIsLoading(false);
-      })
-      .catch((e) => {
-        setIsLoading(false);
-        setError(e);
-      });
-    };
+    emailRegisterService(email, password);
+  }
 
   return (
     <AuthenticationContext.Provider
@@ -95,7 +81,7 @@ export const AuthenticationContextProvider: FC = ({ children }) => {
         isLoading,
         error,
         emailLogin,
-        emailRegister,
+        emailRegister: emailRegisterHandler,
         googleLogin,
         logout,
       }}
