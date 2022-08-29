@@ -10,7 +10,8 @@ const initialUser = mockUsers[0];
 
 const emailLogin = (email: string, password: string) => {
   let foundUser: any = null;
-  let error: string | null= null;
+  let error: string | null = null;
+
   mockUsers.forEach((user: any) => {
     if (user.email === email) {
       foundUser = user;
@@ -18,7 +19,7 @@ const emailLogin = (email: string, password: string) => {
   });
 
   if (foundUser) {
-    if (foundUser.email !== email) {
+    if (foundUser.password !== password) {
       error = "Incorrect Password";
     }
   }
@@ -34,8 +35,8 @@ const emailLogin = (email: string, password: string) => {
     }
     else {
       if (userChangeCallback && foundUser) {
-        const { password, ...rest} = foundUser;
-        userChangeCallback(foundUser);
+        const { password, ...user } = foundUser;
+        userChangeCallback(user);
       }
     }
   }, 1000)
