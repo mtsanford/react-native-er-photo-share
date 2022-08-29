@@ -139,9 +139,10 @@ interface ImageCarouselFlatListProps {
   initialIndex: number;
   onIndexChange: (index: number) => void;
   onScrollingChange: ( isScrolling: boolean) => void;
+  onTouched: () => void;
 }
 
-export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialIndex, onIndexChange, images, onScrollingChange }) => {
+export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialIndex, onIndexChange, images, onScrollingChange, onTouched }) => {
   const [screenDimensions, setScreenDimensions] = useState(
     Dimensions.get("screen")
   );
@@ -223,6 +224,10 @@ export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialI
     });
   }, []);
 
+  // const onTouchStart = () => {
+  //   onTouched();
+  // }
+
   return (
       <FlatList
         data={images}
@@ -241,6 +246,7 @@ export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialI
         windowSize={5}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
+        onTouchStart={onTouched}
         onMomentumScrollBegin={onMomentumScrollBegin}
         onMomentumScrollEnd={onMomentumScrollEnd}
         onLayout={onLayout}
@@ -272,11 +278,15 @@ export const ImageCarouselScreen: FC<ImageCarouselScreenProps> = ({ route, navig
     setShowInfo(!newValue);
   }
 
+  const onTouched = () => {
+    setShowInfo((oldval) => !oldval);
+  }
+
   return (
     <View style={styles.carousel}>
       <CloseOverlay onClose={onClose} />
       <DetailsOverlay showInfo={showInfo} image={currentImage} />
-      <ImageCarouselFlatList images={recentImages} initialIndex={initialIndex} onIndexChange={onIndexChange} onScrollingChange={onScrollingChange}/>
+      <ImageCarouselFlatList images={recentImages} initialIndex={initialIndex} onIndexChange={onIndexChange} onScrollingChange={onScrollingChange} onTouched={onTouched} />
     </View>
   );
 };
