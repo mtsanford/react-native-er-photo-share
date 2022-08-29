@@ -14,6 +14,7 @@ import { theme } from "./src/infrastructure/theme";
 
 import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
 import { FirebaseAuthenticationService } from "./src/services/authentication/firebase.authentication.service";
+import { MockAuthenticationService } from "./src/services/authentication/mock.authentication.service";
 
 import { ImagesContextProvider } from "./src/services/images/images.context";
 import { FirebaseImagesService } from "./src/services/images/firebase.images.service";
@@ -49,7 +50,7 @@ export default function App(): JSX.Element | null {
   return (
     <View style={styles.rootView} onLayout={onLayoutRootView}>
       <ThemeProvider theme={theme}>
-        <AuthenticationContextProvider service={FirebaseAuthenticationService}>
+        <AuthenticationContextProvider service={MockAuthenticationService}>
           <ImagesContextProvider service={MockImagesService}>
             <Navigation />
           </ImagesContextProvider>

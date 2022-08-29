@@ -23,7 +23,8 @@ const now = new Date();
 export const mockAllImages: Record<string, Image> = {
     "pic1" : {
         id: "pic1",
-        userId: "user1",
+        userId: "101",
+        userName: "User 1",
         title: "mock picture 1",
         full: mock_01_full,
         preview: mock_01_preview,
@@ -33,7 +34,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic2" : {
         id: "pic2",
-        userId: "user2",
+        userId: "102",
+        userName: "User 2",
         title: "mock picture 2",
         full: mock_02_full,
         preview: mock_02_preview,
@@ -43,7 +45,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic3" : {
         id: "pic3",
-        userId: "user2",
+        userId: "102",
+        userName: "User 2",
         title: "mock picture 3",
         full: mock_03_full,
         preview: mock_03_preview,
@@ -53,7 +56,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic4" : {
         id: "pic4",
-        userId: "user1",
+        userId: "101",
+        userName: "User 1",
         title: "mock picture 4",
         full: mock_01_full,
         preview: mock_01_preview,
@@ -64,6 +68,7 @@ export const mockAllImages: Record<string, Image> = {
     "pic5" : {
         id: "pic5",
         userId: "user2",
+        userName: "User 2",
         title: "mock picture 5",
         full: mock_02_full,
         preview: mock_02_preview,
@@ -73,7 +78,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic6" : {
         id: "pic6",
-        userId: "user2",
+        userId: "102",
+        userName: "User 2",
         title: "mock picture 6",
         full: mock_03_full,
         preview: mock_03_preview,
@@ -83,7 +89,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic7" : {
         id: "pic7",
-        userId: "user1",
+        userId: "101",
+        userName: "User 1",
         title: "mock picture 7",
         full: mock_01_full,
         preview: mock_01_preview,
@@ -93,7 +100,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic8" : {
         id: "pic8",
-        userId: "user2",
+        userId: "102",
+        userName: "User 2",
         title: "mock picture 8",
         full: mock_02_full,
         preview: mock_02_preview,
@@ -103,7 +111,8 @@ export const mockAllImages: Record<string, Image> = {
     },
     "pic9" : {
         id: "pic9",
-        userId: "user2",
+        userId: "102",
+        userName: "User 2",
         title: "mock picture 9",
         full: mock_03_full,
         preview: mock_03_preview,

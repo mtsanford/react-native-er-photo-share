@@ -56,6 +56,7 @@ export const AuthenticationContextProvider: FC<AuthenticationContextProviderProp
     }
 
     const onError = (error: string) => {
+      setIsLoading(false);
       setError(error);
     };
 
