@@ -6,7 +6,7 @@ import React, {
   useRef,
   FC,
 } from "react";
-import { Dimensions, ScaledSize, ViewabilityConfig } from "react-native";
+import { Dimensions, ScaledSize, ViewabilityConfig, Animated } from "react-native";
 import { FlatList, View, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
@@ -73,16 +73,49 @@ const Title = styled(Text)`
 `;
 
 const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
-  const style = {
-    opacity: showInfo ? 1 : 0.2
-  };
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const fadeIn = useCallback(
+    () => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  , []);
+
+  const fadeOut = useCallback(
+    () => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  , []);
+
+  useEffect(() => {
+    if (showInfo)  { fadeIn(); }
+    else { fadeOut(); }
+  }, [showInfo] )
 
   return (
-    <View style={[styles.overlay, style]} pointerEvents="box-none">
+    <View style={styles.overlay} pointerEvents="box-none">
       <SafeArea pointerEvents="box-none">
-        <View style={styles.detailsInner} pointerEvents="box-none">
-          <Title>{image.title}</Title>
-        </View>
+        <Animated.View
+          pointerEvents="box-none"
+          style={[
+            styles.detailsInner,
+            {
+              // Bind opacity to animated value
+              opacity: fadeAnim,
+            },
+          ]}>
+          <View pointerEvents="box-none">
+            <Title>{image.title}</Title>
+          </View>
+        </Animated.View>
       </SafeArea>
     </View>
   )
@@ -264,6 +297,9 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "transparent",
     flex: 1,
+  },
+  fadingContainer: {
+
   },
   detailsInner: {
     flex: 1,
