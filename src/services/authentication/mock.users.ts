@@ -1,38 +1,25 @@
 import { Image as RNImage } from "react-native";
 
-import { User } from "../../infrastructure/types/user.types";
+const numUsers = 4;
 
-
-// const mock_01_full_asset = require( "../../../../assets/mock/mock_01_full.jpg");
-// const mock_01_full = RNImage.resolveAssetSource(mock_01_full_asset).uri;
-
-export const mockUsers = [
-    {
-        email: "test1@gmail.com",
-        password: "test123",
-        displayName: "test 1",
-        photoURL: "",
-        uid: "101"
-    },
-    {
-        email: "test2@gmail.com",
-        password: "test123",
-        displayName: "test 2",
-        photoURL: "",
-        uid: "102"
-    },
-    {
-        email: "test3@gmail.com",
-        password: "test123",
-        displayName: "test 3",
-        photoURL: "",
-        uid: "103"
-    },
-    {
-        email: "test4@gmail.com",
-        password: "test123",
-        displayName: "test 4",
-        photoURL: "",
-        uid: "104"
-    },
+const assets = [
+  require("../../../assets/mock/users/user_1_small.jpg"),
+  require("../../../assets/mock/users/user_2_small.jpg"),
 ];
+
+export let mockUsers: any[] = [];
+
+for (let i=1; i<=numUsers; i++) {
+  const asset = assets[i%assets.length];
+  const url = RNImage.resolveAssetSource(asset).uri;
+  mockUsers.push({
+    email: `test${i}@gmail.com`,
+    pasword: "test123",
+    displayName: `Mock User ${i}`,
+    photoURL: url,
+    uid: `${100 + i}`,
+  });
+}
+
+console.log(mockUsers);
+

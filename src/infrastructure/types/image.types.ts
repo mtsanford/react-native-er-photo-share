@@ -5,6 +5,7 @@ export interface Image {
     created: Date;
     userId: string;
     userName: string;
+    photoURL: string;
     title: string;
     preview: string;
     full: string;

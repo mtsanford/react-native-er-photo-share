@@ -7,7 +7,7 @@ import React, {
   FC,
 } from "react";
 import { Dimensions, ScaledSize, ViewabilityConfig, Animated } from "react-native";
-import { FlatList, View, StyleSheet, Text } from "react-native";
+import { FlatList, View, StyleSheet, Text, Image as RNImage } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -60,17 +60,51 @@ const CloseOverlay: FC<CloseOverlayProps> = ( {onClose} ) => {
   )
 }
 
+const DetailsBox = styled.View.attrs(
+  () => ({
+    pointerEvents: "box-none"
+  })
+)`
+  background-color: rgba(255, 255, 255, 0.7);
+  height: 100px;
+  padding: 12px;
+`
+
+const Title = styled.Text.attrs(
+  () => ({
+    pointerEvents: "none"
+  })
+)`
+  font-size: 20px;
+  color: black
+  padding-bottom: 4px;
+`
+
+const UserBox = styled.View.attrs(
+  () => ({
+    pointerEvents: "auto"
+  })
+)`
+  flex: 1;
+  flex-direction: row;
+  align-items:center;
+`
+
+const UserImage = styled.Image`
+  width: 24px;
+  height: 24px;
+`
+
+const UserName = styled.Text`
+  font-size: 24px;
+  color: #222;
+  padding-left: 4px;
+`;
+
 interface DetailsOverlayProps {
   showInfo?: boolean;
   image: Image;
 }
-
-const Title = styled(Text)`
-  font-size: 20px;
-  background-color: white;
-  color: black;
-  padding: 4px;
-`;
 
 const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -112,9 +146,15 @@ const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
               opacity: fadeAnim,
             },
           ]}>
-          <View pointerEvents="box-none">
+
+          <DetailsBox>
             <Title>{image.title}</Title>
-          </View>
+            <UserBox>
+              <UserImage source={{ uri: image.photoURL }} />
+              <UserName>{image.userName}</UserName>
+            </UserBox>
+          </DetailsBox>
+
         </Animated.View>
       </SafeArea>
     </View>
@@ -224,10 +264,6 @@ export const ImageCarouselFlatList: FC<ImageCarouselFlatListProps> = ({ initialI
     });
   }, []);
 
-  // const onTouchStart = () => {
-  //   onTouched();
-  // }
-
   return (
       <FlatList
         data={images}
@@ -313,7 +349,7 @@ const styles = StyleSheet.create({
   },
   detailsInner: {
     flex: 1,
-    padding: 16,
+    padding: 24,
     justifyContent: "flex-end",
   },
   closeStyle: {
