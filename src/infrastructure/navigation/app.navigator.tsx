@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { HomeNavigator } from "./home.navigator";
 import { ImageCarouselScreen } from "../../features/images/image-carousel.screen";
 import { SelectEssentialRectScreen } from "../../features/post/SelectEssentialRect.screen";
+import { UserScreen } from "../../features/user/user.screen"
 import { AppStackParamList } from "./params";
 
 
@@ -30,6 +31,13 @@ export const AppNavigator = () => {
         <RootStack.Screen
           name="ERSelect"
           component={SelectEssentialRectScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <RootStack.Screen
+          name="UserInfo"
+          component={UserScreen}
           options={{
             headerShown: false,
           }}

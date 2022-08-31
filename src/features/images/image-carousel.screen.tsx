@@ -7,10 +7,11 @@ import React, {
   FC,
 } from "react";
 import { Dimensions, ScaledSize, ViewabilityConfig, Animated } from "react-native";
-import { FlatList, View, StyleSheet, Text, Image as RNImage } from "react-native";
+import { FlatList, View, StyleSheet, Text, Image as RNImage, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styled from "styled-components/native";
-import { StackScreenProps } from "@react-navigation/stack";
+import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
 
 import { EssentialRectImage } from "../../components/EssentialRectImage";
 import { ImagesContext } from "../../services/images/images.context";
@@ -80,7 +81,7 @@ const Title = styled.Text.attrs(
   padding-bottom: 4px;
 `
 
-const UserBox = styled.View.attrs(
+const UserBox = styled(TouchableOpacity).attrs(
   () => ({
     pointerEvents: "auto"
   })
@@ -101,12 +102,15 @@ const UserName = styled.Text`
   padding-left: 4px;
 `;
 
+type NavigationProps = StackNavigationProp<AppStackParamList>;
+
 interface DetailsOverlayProps {
   showInfo?: boolean;
   image: Image;
 }
 
 const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
+  const navigation = useNavigation<NavigationProps>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const fadeIn = useCallback(
@@ -134,6 +138,10 @@ const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
     else { fadeOut(); }
   }, [showInfo] )
 
+  const userClickedHandler = useCallback(() => {
+    navigation.navigate("UserInfo", { uid: image.userId });
+  }, [])
+
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <SafeArea pointerEvents="box-none">
@@ -149,7 +157,7 @@ const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
 
           <DetailsBox>
             <Title>{image.title}</Title>
-            <UserBox>
+            <UserBox onPress={userClickedHandler}>
               <UserImage source={{ uri: image.photoURL }} />
               <UserName>{image.userName}</UserName>
             </UserBox>
