@@ -48,7 +48,7 @@ for (let i=0; i<numImages; i++) {
   const id = `pic${i+1}`;
   mockAllImages[id] = {
     id: id,
-    userId: user.userId,
+    userId: user.uid,
     userName: user.displayName,
     photoURL: user.photoURL,
     title: `mock picture ${i+1}`,
@@ -66,5 +66,6 @@ for (const [key, value] of Object.entries(mockAllImages)) {
     mockRecentResults.push(value);
 }
 
+console.log(mockRecentResults);
 
 
