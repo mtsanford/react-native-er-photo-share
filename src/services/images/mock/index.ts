@@ -3,134 +3,62 @@ import { Image as RNImage } from "react-native";
 import { Image } from '../../../infrastructure/types/image.types';
 import { mockUsers } from '../../authentication/mock.users';
 
-const mock_01_full_asset = require( "../../../../assets/mock/mock_01_full.jpg");
-const mock_01_preview_asset = require( "../../../../assets/mock/mock_01_preview.jpg");
-const mock_02_full_asset = require( "../../../../assets/mock/mock_02_full.jpg");
-const mock_02_preview_asset = require( "../../../../assets/mock/mock_02_preview.jpg");
-const mock_03_full_asset = require( "../../../../assets/mock/mock_03_full.jpg");
-const mock_03_preview_asset = require( "../../../../assets/mock/mock_03_preview.jpg");
+export const numImages = 20;
 
-const mock_01_full = RNImage.resolveAssetSource(mock_01_full_asset).uri;
-const mock_01_preview = RNImage.resolveAssetSource(mock_01_preview_asset).uri;
-
-const mock_02_full = RNImage.resolveAssetSource(mock_02_full_asset).uri;
-const mock_02_preview = RNImage.resolveAssetSource(mock_02_preview_asset).uri;
-
-const mock_03_full = RNImage.resolveAssetSource(mock_03_full_asset).uri;
-const mock_03_preview = RNImage.resolveAssetSource(mock_03_preview_asset).uri;
-
-const now = new Date();
-
-export const mockAllImages: Record<string, Image> = {
-    "pic1" : {
-        id: "pic1",
-        userId: mockUsers[0].userId,
-        userName: mockUsers[0].displayName,
-        photoURL: mockUsers[0].photoURL,
-        title: "mock picture 1",
-        full: mock_01_full,
-        preview: mock_01_preview,
+const imageAssets = [
+    {
+        full: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_01_full.jpg")).uri,
+        preview: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_01_preview.jpg")).uri,
         essentialRect: {left:679, top:80, width:415, height:623},
         size: { width: 1350, height: 900 },
-        created: now,
     },
-    "pic2" : {
-        id: "pic2",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 2",
-        full: mock_02_full,
-        preview: mock_02_preview,
+    {
+        full: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_02_full.jpg")).uri,
+        preview: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_02_preview.jpg")).uri,
         essentialRect: {left:347, top:384, width:461, height:507},
         size: { width: 1100, height: 1000 },
-        created: now,
     },
-    "pic3" : {
-        id: "pic3",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 3",
-        full: mock_03_full,
-        preview: mock_03_preview,
+    {
+        full: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_03_full.jpg")).uri,
+        preview: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_03_preview.jpg")).uri,
         essentialRect: {left:563, top:231, width:415, height:562},
         size: { width: 1219, height: 900 },
-        created: now,
     },
-    "pic4" : {
-        id: "pic4",
-        userId: mockUsers[0].userId,
-        userName: mockUsers[0].displayName,
-        photoURL: mockUsers[0].photoURL,
-        title: "mock picture 4",
-        full: mock_01_full,
-        preview: mock_01_preview,
-        essentialRect: {left:679, top:80, width:415, height:623},
-        size: { width: 1350, height: 900 },
-        created: now,
+    {
+        full: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_04_full.jpg")).uri,
+        preview: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_04_preview.jpg")).uri,
+        size: { width: 1221, height: 1200 },
+        essentialRect: {left:352, top:314, width:553, height:563},
     },
-    "pic5" : {
-        id: "pic5",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 5",
-        full: mock_02_full,
-        preview: mock_02_preview,
-        essentialRect: {left:347, top:384, width:461, height:507},
-        size: { width: 1100, height: 1000 },
-        created: now,
+    {
+        full: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_05_full.jpg")).uri,
+        preview: RNImage.resolveAssetSource(require( "../../../../assets/mock/images/mock_05_preview.jpg")).uri,
+        size: { width: 1265, height: 1300 },
+        essentialRect: {left:335, top:336, width:600, height:583},
     },
-    "pic6" : {
-        id: "pic6",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 6",
-        full: mock_03_full,
-        preview: mock_03_preview,
-        essentialRect: {left:563, top:231, width:415, height:562},
-        size: { width: 1219, height: 900 },
-        created: now,
-    },
-    "pic7" : {
-        id: "pic7",
-        userId: mockUsers[0].userId,
-        userName: mockUsers[0].displayName,
-        photoURL: mockUsers[0].photoURL,
-        title: "mock picture 7",
-        full: mock_01_full,
-        preview: mock_01_preview,
-        essentialRect: {left:679, top:80, width:415, height:623},
-        size: { width: 1350, height: 900 },
-        created: now,
-    },
-    "pic8" : {
-        id: "pic8",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 8",
-        full: mock_02_full,
-        preview: mock_02_preview,
-        essentialRect: {left:347, top:384, width:461, height:507},
-        size: { width: 1100, height: 1000 },
-        created: now,
-    },
-    "pic9" : {
-        id: "pic9",
-        userId: mockUsers[1].userId,
-        userName: mockUsers[1].displayName,
-        photoURL: mockUsers[1].photoURL,
-        title: "mock picture 9",
-        full: mock_03_full,
-        preview: mock_03_preview,
-        essentialRect: {left:563, top:231, width:415, height:562},
-        size: { width: 1219, height: 900 },
-        created: now,
-    },
-};
+];
+
+let mockAllImages: Record<string, Image> = {};
+
+const nowTimestamp = Date.now();
+
+for (let i=0; i<numImages; i++) {
+  const user = mockUsers[i % mockUsers.length];
+  const image = imageAssets[i % imageAssets.length];
+  const id = `pic${i+1}`;
+  mockAllImages[id] = {
+    id: id,
+    userId: user.userId,
+    userName: user.displayName,
+    photoURL: user.photoURL,
+    title: `mock picture ${i+1}`,
+    full: image.full,
+    preview: image.preview,
+    essentialRect: image.essentialRect,
+    size: image.size,
+    created: new Date(nowTimestamp - i * 10 * 60 * 1000),
+  }
+}
 
 export let mockRecentResults: Image[] = [];
 
