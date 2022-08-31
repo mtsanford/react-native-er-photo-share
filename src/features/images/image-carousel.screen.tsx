@@ -102,15 +102,13 @@ const UserName = styled.Text`
   padding-left: 4px;
 `;
 
-type NavigationProps = StackNavigationProp<AppStackParamList>;
-
 interface DetailsOverlayProps {
   showInfo?: boolean;
   image: Image;
 }
 
 const DetailsOverlay: FC<DetailsOverlayProps> = ({ showInfo, image }) => {
-  const navigation = useNavigation<NavigationProps>();
+  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const fadeIn = useCallback(

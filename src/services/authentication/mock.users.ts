@@ -1,6 +1,6 @@
 import { Image as RNImage } from "react-native";
 
-const numUsers = 4;
+export const numUsers = 2;
 
 const assets = [
   require("../../../assets/mock/users/user_1_small.jpg"),
